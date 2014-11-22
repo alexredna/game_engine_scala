@@ -46,6 +46,10 @@ class GameEnvironment {
 			lastAdded.location(pos._1, pos._2)
 			lastAdded = null
 		}
+
+		override def toString(): String = {
+			"Environment " + s
+		}
 	}
 
 	case class Shape(s: Symbol) {
@@ -62,6 +66,8 @@ class GameEnvironment {
 			fetch().setColor(c)
 			this
 		}
+
+		override def toString(): String = fetch().toString()
 	}
 
 
@@ -86,6 +92,14 @@ class GameEnvironment {
 		}
 	}
 
+	def about(s: Symbol) {
+		if (bindings.contains(s))
+			println(Shape(s))
+		else if (enviros.contains(s))
+			println(Environment(s))
+		else
+			println("Unbound variable")
+	}
 
 	implicit def symbol2Shape(s: Symbol) = Shape(s)
 	implicit def symbol2Environment(s: Symbol) = Environment(s)
