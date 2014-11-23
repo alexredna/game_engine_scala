@@ -137,9 +137,22 @@ public class AnimatingPanel extends JPanel implements Runnable, KeyListener
     {
         /** Call upon all children the animate method */
         synchronized (children) {
-            ListIterator<AnimatingChild> it = children.listIterator();
-            while (it.hasNext()) {
-                it.next().animate();
+            ListIterator<AnimatingChild> it1 = children.listIterator();
+            while (it1.hasNext()) {
+                it1.next().animate();
+            }
+
+            ListIterator<AnimatingChild> it2 = children.listIterator();
+            while (it2.hasNext()) {
+                AnimatingChild c = it2.next();
+
+                for (AnimatingChild other: c.getInteractions().keySet()) {
+                    if (c.intersects(other)) {
+                        /*Rectangle2D.Double cross = c.createIntersection(other);
+                        c.getInteractions.get()
+                        listener(c, other, )*/
+                    }
+                }
             }
         }
     }
