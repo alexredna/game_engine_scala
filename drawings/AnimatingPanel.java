@@ -178,7 +178,8 @@ public class AnimatingPanel extends JPanel implements Runnable, KeyListener
             Toolkit.getDefaultToolkit().sync();
             g.dispose();
         } catch (Exception e) {
-            System.out.println("Graphics context error: " + e);
+            System.err.println("Error: Environment created but not added to frame.");
+            //System.out.println("Graphics context error: " + e);
             System.exit(0);
         }
     }
