@@ -24,7 +24,7 @@ public class Circle extends AnimatingChild
 
     public void animate()
     {
-        if(active) {
+        if (active) {
             x += speed * Math.cos(Math.toRadians(direction));
             y -= speed * Math.sin(Math.toRadians(direction));    
         }

@@ -1,11 +1,12 @@
 package drawings;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.*;
 import java.util.*;
 import javax.swing.*;
 
-public class AnimatingPanel extends JPanel implements Runnable
+public class AnimatingPanel extends JPanel implements Runnable, KeyListener
 {
     // -----------------------------------------------------------------
     // all of these variables deal with the animation
@@ -24,21 +25,61 @@ public class AnimatingPanel extends JPanel implements Runnable
     // container
     private JFrame frame;
     // children
-    /** declare children here */
     private java.util.List<AnimatingChild> children;
+    // key binding
+    private HashMap<Integer, HashMap<AnimatingChild, JavaAction>> bindings;
 
     public AnimatingPanel(JFrame frame)
     {
         this.frame = frame;
 
         children = Collections.synchronizedList(new ArrayList<AnimatingChild>());
+        bindings = new HashMap<Integer, HashMap<AnimatingChild, JavaAction>>();
 
-        /** add Mouse, MouseMotion, Component, and Key Listeners here (optional) */
+        /* add Mouse, MouseMotion, Component, and Key Listeners here (optional) */
+        frame.addKeyListener(this);
+        requestFocus();
     }
 
     public void addChild(AnimatingChild child) {
         children.add(child);
     }
+
+    public void addKeyBinding(int key, JavaAction action, AnimatingChild child) {
+        if (!bindings.containsKey(key)) {  
+            HashMap<AnimatingChild, JavaAction> childList = new HashMap<AnimatingChild, JavaAction>();
+            childList.put(child, action);
+            bindings.put(key, childList);
+        } else {
+            HashMap<AnimatingChild, JavaAction> childList = bindings.get(key);
+            childList.put(child, action);
+            bindings.put(key, childList);
+        }
+    }
+
+    public void keyPressed(KeyEvent e) {
+        int key = e.getKeyCode();
+        if (!bindings.containsKey(key))
+            return;
+        HashMap<AnimatingChild, JavaAction> childList = bindings.get(key);
+        for (AnimatingChild child : childList.keySet()) {
+            JavaAction action = childList.get(child);
+            action.performPress(child);
+        }
+    }
+
+    public void keyReleased(KeyEvent e) {
+        int key = e.getKeyCode();
+        if (!bindings.containsKey(key))
+            return;
+        HashMap<AnimatingChild, JavaAction> childList = bindings.get(key);
+        for (AnimatingChild child : childList.keySet()) {
+            JavaAction action = childList.get(child);
+            action.performRelease(child);
+        }
+    }
+
+    public void keyTyped(KeyEvent e) { }
 
     public void startAnimation()
     {

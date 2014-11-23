@@ -3,6 +3,7 @@ import drawings.AnimatingChild
 import drawings.AnimatingPanel
 import drawings.Frame
 import drawings.Rectangle
+import drawings.JavaAction
 
 import scala.collection.mutable.Map
 import scala.language.implicitConversions
@@ -12,13 +13,39 @@ import java.awt.Color
 class GameEnvironment {
 
 	val frame = new drawings.Frame()
-	var bindings = Map[Symbol, AnimatingChild]()
-	var enviros = Map[Symbol, AnimatingPanel]()
+	var shape_bindings = Map[Symbol, AnimatingChild]()
+	var environment_bindings = Map[Symbol, AnimatingPanel]()
+	var action_bindings = Map[Symbol, JavaAction]()
+
+	object Create {
+		def environment(s: Symbol): Environment = {
+			val ap = new AnimatingPanel(frame)
+			frame.setPanel(ap)
+			environment_bindings += (s -> ap)
+			Environment(s)
+		}
+
+		def action(s: Symbol): Action = {
+			val a = new JavaAction(s.name);
+			action_bindings += (s -> a)
+			Action(s)
+		}
+
+		def circle(s: Symbol): Shape = {
+			val c = new Circle()
+			shape_bindings += (s -> c)
+			Shape(s)
+		}
+
+		def rectangle(s: Symbol): Shape = {
+			val r = new Rectangle()
+			shape_bindings += (s -> r)
+			Shape(s)
+		}
+	}
 
 	case class Environment(s: Symbol) {
-		def fetch(): AnimatingPanel = {
-			enviros.get(s).get
-		}
+		def fetch(): AnimatingPanel = environment_bindings.get(s).get
 
 		var lastAdded: Shape = null
 
@@ -27,6 +54,7 @@ class GameEnvironment {
 			lastAdded = s
 			this
 		}
+
 		def at(pos: (Int, Int)) {
 			if (lastAdded == null)
 				sys.error("BAD")
@@ -34,16 +62,16 @@ class GameEnvironment {
 			lastAdded = null
 		}
 
-		override def toString(): String = {
-			"Environment " + s
+		def onKeyPress(key: Int, action: Action, child: Shape): Environment = {
+			fetch().addKeyBinding(key, action.fetch(), child.fetch());
+			this
 		}
+
+		override def toString(): String = "Environment " + s
 	}
 
 	case class Shape(s: Symbol) {
-		var interactions = Map[Shape, Int]()
-		def fetch(): AnimatingChild = {
-			bindings.get(s).get
-		}
+		def fetch(): AnimatingChild = shape_bindings.get(s).get
 
 		def location(x: Int, y: Int): Shape = {
 			fetch().setLocation(x, y)
@@ -61,27 +89,35 @@ class GameEnvironment {
 			fetch().setVelocity(direction, speed)
 			this
 		}
-/*
-		def interaction(inter: (Shape, Int)) = {
-			var (other, action) = inter
-			var ac: AnimatingChild = fetch()
-			switch(action) {
-				case GameCons.bounces:
-					
-					
-				case GameCons.destroys:
-			}
-			this
-		}
-*/
-		def mit(t: Article): Shape = {
-			this
-		}
-		def und(t: Article): Shape = {
+
+		def mit(t: Article): Shape = this
+		def und(t: Article): Shape = this
+		override def toString(): String = fetch().toString()
+	}
+
+	case class Action(s: Symbol) {
+		var isOnPress: Boolean = false
+		def fetch(): JavaAction = action_bindings.get(s).get
+
+		def color(c: Color): Action = {
+			fetch().activateColor(c, isOnPress)
 			this
 		}
 
-		override def toString(): String = fetch().toString()
+		def velocity(direction: Int, speed: Int): Action = {
+			fetch().activateVelocity(direction, speed, isOnPress)
+			this
+		}
+
+		def mit(t: ActionTiming): Action = {
+			isOnPress = t == onPress;
+			this
+		}
+		def und(t: ActionTiming): Action = {
+			isOnPress = t == onPress;
+			this
+		}
+		override def toString(): String = "Action " + s
 	}
 
 	def start(s: Shape) {
@@ -92,40 +128,25 @@ class GameEnvironment {
 		s.fetch().setActive(false)
 	}
 
-	object Create {
-		def environment(s: Symbol): Environment = {
-			val ap = new AnimatingPanel(frame)
-			frame.setPanel(ap)
-			enviros += (s -> ap)
-			Environment(s)
-		}
-
-		def circle(s: Symbol): Shape = {
-			val c = new Circle()
-			bindings += (s -> c)
-			Shape(s)
-		}
-
-		def rectangle(s: Symbol): Shape = {
-			val r = new Rectangle()
-			bindings += (s -> r)
-			Shape(s)
-		}
-	}
-
 	class Article
 	val a = new Article()
 	val an = new Article()
+	class ActionTiming
+	val onPress = new ActionTiming()
+	val onRelease = new ActionTiming()
 
 	def about(s: Symbol) {
-		if (bindings.contains(s))
+		if (shape_bindings.contains(s))
 			println(Shape(s))
-		else if (enviros.contains(s))
+		else if (environment_bindings.contains(s))
 			println(Environment(s))
+		else if (action_bindings.contains(s))
+			println(Action(s))
 		else
 			println("Unbound variable")
 	}
 
 	implicit def symbol2Shape(s: Symbol) = Shape(s)
 	implicit def symbol2Environment(s: Symbol) = Environment(s)
+	implicit def symbol2Action(s: Symbol) = Action(s)
 }

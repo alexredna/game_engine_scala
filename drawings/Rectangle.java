@@ -24,7 +24,7 @@ public class Rectangle extends AnimatingChild
 
     public void animate()
     {   
-        if(active) {
+        if (active) {
             x += speed * Math.cos(Math.toRadians(direction));
             y -= speed * Math.sin(Math.toRadians(direction));
         }
@@ -32,10 +32,7 @@ public class Rectangle extends AnimatingChild
 
     public void draw(Graphics2D g2)
     {
-        Rectangle2D.Double rect = new Rectangle2D.Double(x,
-                y,
-                width,
-                height);
+        Rectangle2D.Double rect = new Rectangle2D.Double(x, y, width, height);
         g2.setColor(color);
         g2.fill(rect);
     }

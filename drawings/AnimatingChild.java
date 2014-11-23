@@ -13,7 +13,7 @@ abstract public class AnimatingChild
 	protected double x, y;
 	protected Color color;
     protected int direction = 0;
-    protected int speed = 10;
+    protected int speed = 0;
     protected boolean active = false;
     /**
      * Animates the object by changing very small details, (such as size, position, or color), that affect the drawing of the object
