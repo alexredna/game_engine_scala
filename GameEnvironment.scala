@@ -67,6 +67,13 @@ class GameEnvironment {
 			this
 		}
 
+		def mit(t: Article): Shape = {
+			this
+		}
+		def und(t: Article): Shape = {
+			this
+		}
+
 		override def toString(): String = fetch().toString()
 	}
 
@@ -91,6 +98,10 @@ class GameEnvironment {
 			Shape(s)
 		}
 	}
+
+	class Article
+	val a = new Article()
+	val an = new Article()
 
 	def about(s: Symbol) {
 		if (bindings.contains(s))
