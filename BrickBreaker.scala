@@ -39,7 +39,5 @@ object BrickBreaker extends GameEnvironment
 		start('c1)
 		start('c2)
 		start('r)
-
-		
 	}
 }
