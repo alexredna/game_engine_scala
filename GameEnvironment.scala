@@ -7,26 +7,13 @@ import drawings.Rectangle
 import scala.collection.mutable.Map
 import scala.language.implicitConversions
 
-import java.awt.Color;
+import java.awt.Color
 
 class GameEnvironment {
 
 	val frame = new drawings.Frame()
 	var bindings = Map[Symbol, AnimatingChild]()
 	var enviros = Map[Symbol, AnimatingPanel]()
-
-	val red = Color.RED
-	val blue = Color.BLUE
-	val green = Color.GREEN
-	val black = Color.BLACK
-	val cyan = Color.CYAN
-	val gray = Color.GRAY
-	val magenta = Color.MAGENTA
-	val orange = Color.ORANGE
-	val pink = Color.PINK
-	val yellow = Color.YELLOW
-	val white = Color.WHITE
-	val burnt_orange = new Color(191, 87, 0)
 
 	case class Environment(s: Symbol) {
 		def fetch(): AnimatingPanel = {
@@ -53,6 +40,7 @@ class GameEnvironment {
 	}
 
 	case class Shape(s: Symbol) {
+		var interactions = Map[Shape, Int]()
 		def fetch(): AnimatingChild = {
 			bindings.get(s).get
 		}
@@ -67,6 +55,25 @@ class GameEnvironment {
 			this
 		}
 
+		def velocity(direction: Int, speed: Int) = {
+			if (direction < 0 || direction > 360)
+				sys.error("Invalid direction for velocity")
+			fetch().setVelocity(direction, speed)
+			this
+		}
+/*
+		def interaction(inter: (Shape, Int)) = {
+			var (other, action) = inter
+			var ac: AnimatingChild = fetch()
+			switch(action) {
+				case GameCons.bounces:
+					
+					
+				case GameCons.destroys:
+			}
+			this
+		}
+*/
 		def mit(t: Article): Shape = {
 			this
 		}
@@ -77,6 +84,13 @@ class GameEnvironment {
 		override def toString(): String = fetch().toString()
 	}
 
+	def start(s: Shape) {
+		s.fetch().setActive(true)
+	}
+
+	def stop(s: Shape) {
+		s.fetch().setActive(false)
+	}
 
 	object Create {
 		def environment(s: Symbol): Environment = {

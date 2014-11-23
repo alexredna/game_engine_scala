@@ -10,7 +10,7 @@ public class AnimatingPanel extends JPanel implements Runnable
     // -----------------------------------------------------------------
     // all of these variables deal with the animation
     // ignore all except DEFAULT_FPS, that may be changed
-    private static final int DEFAULT_FPS = 60;
+    private static final int DEFAULT_FPS = 30;
     private static final int NO_DELAYS_PER_YIELD = 16;
     private static int MAX_FRAME_SKIPS = 5;
     private Thread animator;
@@ -25,15 +25,14 @@ public class AnimatingPanel extends JPanel implements Runnable
     private JFrame frame;
     // children
     /** declare children here */
-    private ArrayList<AnimatingChild> children;
+    private java.util.List<AnimatingChild> children;
 
     public AnimatingPanel(JFrame frame)
     {
         this.frame = frame;
 
-        children = new ArrayList<AnimatingChild>();
+        children = Collections.synchronizedList(new ArrayList<AnimatingChild>());
 
-        // -----------------------------------------------------------------
         /** add Mouse, MouseMotion, Component, and Key Listeners here (optional) */
     }
 
@@ -96,9 +95,11 @@ public class AnimatingPanel extends JPanel implements Runnable
     private void update()
     {
         /** Call upon all children the animate method */
-        ListIterator<AnimatingChild> it = children.listIterator();
-        while (it.hasNext()) {
-            it.next().animate();
+        synchronized (children) {
+            ListIterator<AnimatingChild> it = children.listIterator();
+            while (it.hasNext()) {
+                it.next().animate();
+            }
         }
     }
 
@@ -118,9 +119,11 @@ public class AnimatingPanel extends JPanel implements Runnable
         dbg2.fillRect(0, 0, getWidth(), getHeight());
 
         /** Call upon all children the draw method */
-        ListIterator<AnimatingChild> it = children.listIterator();
-        while (it.hasNext()) {
-            it.next().draw(dbg2);
+        synchronized (children) {
+            ListIterator<AnimatingChild> it = children.listIterator();
+            while (it.hasNext()) {
+                it.next().draw(dbg2);
+            }
         }
     }
 

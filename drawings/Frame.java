@@ -26,8 +26,11 @@ public class Frame extends JFrame
         content.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setContentPane(content);
+        int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
+        int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
+        setLocation((screenWidth - 800)/2 , (screenHeight - 600)/2);
         setSize(new Dimension(800, 600));
+        setContentPane(content);
         //setExtendedState(JFrame.MAXIMIZED_BOTH);
         setVisible(true);
         setResizable(false);

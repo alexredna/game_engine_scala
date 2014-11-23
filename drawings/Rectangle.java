@@ -23,8 +23,11 @@ public class Rectangle extends AnimatingChild
     }
 
     public void animate()
-    {
-        x += 1;
+    {   
+        if(active) {
+            x += speed * Math.cos(Math.toRadians(direction));
+            y -= speed * Math.sin(Math.toRadians(direction));
+        }
     }
 
     public void draw(Graphics2D g2)
@@ -35,6 +38,14 @@ public class Rectangle extends AnimatingChild
                 height);
         g2.setColor(color);
         g2.fill(rect);
+    }
+
+    public boolean intersects(AnimatingChild ac) {
+        return ac.getBounds().intersects(x, y, width, height);
+    }
+
+    protected Rectangle2D.Double getBounds() {
+        return new Rectangle2D.Double(x, y, width, height);
     }
 
     public String toString() {
