@@ -10,32 +10,54 @@ import javax.swing.*;
  */
 public class Frame extends JFrame
 {
-    AnimatingPanel panel;
+    AnimatingPanel panel1;
+    AnimatingPanel panel2;
+
+    JPanel content;
+    JPanel environmentPanel;
 
     public Frame()
     {
         super("MY PROGRAM");
+
+        environmentPanel = new JPanel(new GridLayout(1, 0, 10, 0));
+        environmentPanel.setOpaque(false);
+
+        content = new JPanel(new BorderLayout());
+        content.add(environmentPanel, BorderLayout.CENTER);
+        content.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        content.setOpaque(false);
     }
 
-    public void setPanel(AnimatingPanel panel)
+    public void addPanel(AnimatingPanel panel)
     {
-        this.panel = panel;
+        if (panel1 == null) {
+            panel1 = panel;
+            environmentPanel.add(panel1);
+        } else if (panel2 == null) {
+            panel2 = panel;
+            environmentPanel.add(panel2);
+        } else {
+            System.err.println("We only support 2 panels, this panel was ignored, loser.");
+        }
+    }
 
-        JPanel content = new JPanel(new BorderLayout());
-        content.add(panel, BorderLayout.CENTER);
-        content.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
+    public void run() {
+        setBackground(Color.DARK_GRAY);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
         int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
-        setLocation((screenWidth - 800)/2 , (screenHeight - 600)/2);
-        setSize(new Dimension(800, 600));
+        setLocation((screenWidth - 1024)/2 , (screenHeight - 600)/2);
+        setSize(new Dimension(1024, 600));
         setContentPane(content);
         //setExtendedState(JFrame.MAXIMIZED_BOTH);
         setVisible(true);
         setResizable(false);
 
-        panel.startAnimation();
+        if (panel1 != null)
+            panel1.startAnimation();
+        if (panel2 != null)
+            panel2.startAnimation();
     }
 
     public static void main(String[] args)

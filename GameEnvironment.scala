@@ -20,7 +20,6 @@ class GameEnvironment {
 	object Create {
 		def environment(s: Symbol): Environment = {
 			val ap = new AnimatingPanel(frame)
-			frame.setPanel(ap)
 			environment_bindings += (s -> ap)
 			Environment(s)
 		}
@@ -41,6 +40,12 @@ class GameEnvironment {
 			val r = new Rectangle()
 			shape_bindings += (s -> r)
 			Shape(s)
+		}
+	}
+
+	object Frame {
+		def addEnvironment(e: Environment) {
+			frame.addPanel(e.fetch())
 		}
 	}
 
@@ -126,6 +131,10 @@ class GameEnvironment {
 
 	def stop(s: Shape) {
 		s.fetch().setActive(false)
+	}
+
+	def Run() {
+		frame.run()
 	}
 
 	class Article
