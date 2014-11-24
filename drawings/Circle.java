@@ -16,6 +16,13 @@ public class Circle extends AnimatingChild
         color = Color.BLACK;
     }
 
+	public void setRadius(double Radius) {
+		this.radius = radius;
+	}
+
+	public double getRadius() {
+		return this.radius;
+	}
     public void animate()
     {
         if (active) {
@@ -26,9 +33,11 @@ public class Circle extends AnimatingChild
 
     public void draw(Graphics2D g2)
     {
-        Ellipse2D.Double rect = new Ellipse2D.Double(x, y, radius, radius);
-        g2.setColor(color);
-        g2.fill(rect);
+		if(visible) {
+	        Ellipse2D.Double rect = new Ellipse2D.Double(x, y, radius, radius);
+    	    g2.setColor(color);
+        	g2.fill(rect);
+		}
     }
 
     public boolean intersects(AnimatingChild ac) {

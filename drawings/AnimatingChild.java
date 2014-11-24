@@ -16,6 +16,7 @@ abstract public class AnimatingChild
     protected int direction = 0;
     protected int speed = 0;
     protected boolean active = false;
+	protected boolean visible = true;
 
     /**
      * Animates the object by changing very small details, (such as size, position, or color), that affect the drawing of the object
@@ -63,6 +64,10 @@ abstract public class AnimatingChild
     public void setActive(boolean active) {
         this.active = active;
     }
+	
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}
 
     public boolean intersects(AnimatingChild other) {
         Rectangle2D.Double t = getBounds();

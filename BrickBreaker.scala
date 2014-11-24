@@ -29,6 +29,8 @@ object BrickBreaker extends GameEnvironment
 
 		Create rectangle 'r mit
 			a color GameCons.burnt_orange
+		Create roundRectangle 'rr mit
+			a location (300, 500)
 
 		// define all environments
 
@@ -41,6 +43,7 @@ object BrickBreaker extends GameEnvironment
 		Create environment 'e2 mit
 			a size (400, 600) und
 			an addShape 'r at (200, 200) und
+			an addShape 'rr at (300, 300) und
 			an onKeyPress (KeyEvent.VK_LEFT, 'move_left, 'r) und
 			an onKeyPress (KeyEvent.VK_RIGHT, 'move_right, 'r)
 
@@ -74,6 +77,7 @@ object BrickBreaker extends GameEnvironment
 		start('c1)
 		start('c2)
 		start('r)
+		start('rr)
 
 		Run
 	}

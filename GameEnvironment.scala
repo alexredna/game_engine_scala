@@ -5,6 +5,7 @@ import drawings.Frame
 import drawings.Rectangle
 import drawings.JavaAction
 import drawings.SplitPanel
+import drawings.RoundRectangle
 
 import scala.collection.mutable.Map
 import scala.language.implicitConversions
@@ -68,6 +69,15 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 			val r = new Rectangle()
 			shape_bindings += (s -> r)
 			animating_child_to_symbol += (r -> s)
+			Shape(s)
+		}
+		
+		def roundRectangle(s: Symbol): Shape = {
+			if(isBound(s))
+				sys.error("Variable " + s + " is already bound.")
+			val rr = new RoundRectangle()
+			shape_bindings += (s -> rr)
+			animating_child_to_symbol += (rr -> s)
 			Shape(s)
 		}
 
@@ -180,6 +190,46 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 			}
 			interaction_bindings += (this -> my_bindings)
 			this
+		}
+
+		def setRadius(s: Shape, radius:Double) {
+			if(s.fetch().isInstanceOf[Circle]) {
+				s.fetch().asInstanceOf[Circle].setRadius(radius)
+			} else {
+				sys.error("Can only change the radius on a circle")
+			}
+		}
+
+		def setWidth(s: Shape, width:Double) {
+			s.fetch() match {
+				case r:Rectangle => r.setWidth(width)
+				case rr:RoundRectangle => rr.setWidth(width)
+				case default => sys.error("Can only set width on shapes with a width")
+			}	
+		}
+
+		def setHeight(s: Shape, height: Double) {
+			s.fetch() match {
+				case r:Rectangle => r.setHeight(height)
+				case rr:RoundRectangle => rr.setHeight(height)
+				case default => sys.error("Can only set width on shapes with a width")
+			}
+		}
+
+		def setArcWidth(s: Shape, arcWidth: Double) {
+			if(s.fetch().isInstanceOf[RoundRectangle]) {
+				s.fetch().asInstanceOf[RoundRectangle].setArcWidth(arcWidth)
+			} else {
+				sys.error("Can only change the arcWidth on a round rectangle")
+			}
+		}
+
+		def setArcHeight(s: Shape, arcHeight: Double) {
+			if(s.fetch().isInstanceOf[RoundRectangle]) {
+				s.fetch().asInstanceOf[RoundRectangle].setArcHeight(arcHeight)
+			} else {
+				sys.error("Can only change the arcHeight on a round rectangle")
+			}	
 		}
 
 		def mit(t: Article): Shape = this
@@ -336,6 +386,14 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 
 	def stop(s: Shape) {
 		s.fetch().setActive(false)
+	}
+	
+	def visible(s: Shape) {
+		s.fetch().setVisible(true)
+	}
+	
+	def invisible(s: Shape) {
+		s.fetch().setVisible(false)
 	}
 
 	def Run() {
