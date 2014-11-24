@@ -10,32 +10,23 @@ import javax.swing.*;
  */
 public class Frame extends JFrame
 {
-    AnimatingPanel panel;
-
     public Frame()
     {
         super("MY PROGRAM");
+
     }
 
-    public void setPanel(AnimatingPanel panel)
-    {
-        this.panel = panel;
-
-        JPanel content = new JPanel(new BorderLayout());
-        content.add(panel, BorderLayout.CENTER);
-        content.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
+    public void run() {
+        //setBackground(Color.DARK_GRAY);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
         int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
-        setLocation((screenWidth - 800)/2 , (screenHeight - 600)/2);
-        setSize(new Dimension(800, 600));
-        setContentPane(content);
+        setLocation((screenWidth - 1024)/2 , (screenHeight - 600)/2);
+        //setSize(new Dimension(1024, 600));
         //setExtendedState(JFrame.MAXIMIZED_BOTH);
+        pack();
         setVisible(true);
         setResizable(false);
-
-        panel.startAnimation();
     }
 
     public static void main(String[] args)
