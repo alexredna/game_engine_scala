@@ -1,3 +1,7 @@
+all: install run
+
+install: java scala
+
 java:
 	javac -classpath /usr/share/scala/lib/scala-library.jar:target/classes \
 	       drawings/*.java
