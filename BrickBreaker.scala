@@ -68,20 +68,22 @@ object BrickBreaker extends GameEnvironment
 
 		Create label 'credits_label mit
 			a text "Copyright your mom"
-
 		'side_panel(1) = 'credits_label
 
-
-		'e addShape 'r at (400, 400)
-
 		'c1 interaction ('c2, destroys)
-		
-		'e onKeyPress (KeyEvent.VK_LEFT, 'move_left, 'r)
-		'e onKeyPress (KeyEvent.VK_RIGHT, 'move_right, 'r)
-		'e onKeyPress (KeyEvent.VK_SPACE, 'change_color, 'c2)
 
 		start('c1)
 		start('c2)
 		start('r)
+
+		Run
+	}
+
+	def bounces(s: Shape) {
+		println("bounces")
+	}
+
+	def destroys(s: Shape) {
+		println("destroys")
 	}
 }

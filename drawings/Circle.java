@@ -4,12 +4,6 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.util.*;
 
-/**
- * GreenMovingCircle is an AnimatingChild extension visually represented by a green circle
- * It changes its y position by one pixel every time its animate method is called
- * 
- * @author Nick Walther
- */
 public class Circle extends AnimatingChild
 {
     private double radius;

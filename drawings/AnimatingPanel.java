@@ -1,11 +1,16 @@
 package drawings;
 
 import java.awt.*;
-import java.awt.event.*;
+import java.beans.*;
 import java.awt.image.*;
 import java.util.*;
 import javax.swing.*;
 
+/**
+ * AnimatingPanel
+ * 
+ * @author Nick Walther
+ */
 public class AnimatingPanel extends JPanel implements Runnable
 {
     // -----------------------------------------------------------------
@@ -33,7 +38,6 @@ public class AnimatingPanel extends JPanel implements Runnable
 
         children = Collections.synchronizedList(new ArrayList<AnimatingChild>());
 
-        /* add Mouse, MouseMotion, Component, and Key Listeners here (optional) */
         requestFocus();
     }
 
@@ -110,7 +114,8 @@ public class AnimatingPanel extends JPanel implements Runnable
                 while (it3.hasNext()) {
                     AnimatingChild other = it3.next();
                     if (!c.equals(other) && c.intersects(other))
-                        c.doInteractions(other);
+                        frame.getPropertyChangeListeners()[0].propertyChange(
+                            new PropertyChangeEvent(frame, "Interaction", c, other));
                 }
             }
         }
