@@ -35,24 +35,24 @@ object BrickBreaker extends JazzFramework
 
         // interactions between already defined shapes
 
-        'c1 interaction ('p1, bounce)
-        'c2 interaction ('p2, bounce)
+        'c1 interaction ('p1, bounce _)
+        'c2 interaction ('p2, bounce _)
 
         // define all environments
 
         Create environment 'e1 mit
             a size (400, 600) und
-            an onKeyPress   (KeyEvent.VK_A, move_left, 'p1) und
-            an onKeyRelease (KeyEvent.VK_A, stop_moving, 'p1) und
-            an onKeyPress   (KeyEvent.VK_D, move_right, 'p1) und
-            an onKeyRelease (KeyEvent.VK_D, stop_moving, 'p1)
+            an onKeyPress   (KeyEvent.VK_A, move_left _, 'p1) und
+            an onKeyRelease (KeyEvent.VK_A, stop_moving _, 'p1) und
+            an onKeyPress   (KeyEvent.VK_D, move_right _, 'p1) und
+            an onKeyRelease (KeyEvent.VK_D, stop_moving _, 'p1)
 
         Create environment 'e2 mit
             a size (400, 600) und
-            an onKeyPress   (KeyEvent.VK_LEFT, move_left, 'p2) und
-            an onKeyRelease (KeyEvent.VK_LEFT, stop_moving, 'p2) und
-            an onKeyPress   (KeyEvent.VK_RIGHT, move_right, 'p2) und
-            an onKeyRelease (KeyEvent.VK_RIGHT, stop_moving, 'p2)
+            an onKeyPress   (KeyEvent.VK_LEFT, move_left _, 'p2) und
+            an onKeyRelease (KeyEvent.VK_LEFT, stop_moving _, 'p2) und
+            an onKeyPress   (KeyEvent.VK_RIGHT, move_right _, 'p2) und
+            an onKeyRelease (KeyEvent.VK_RIGHT, stop_moving _, 'p2)
 
         for (row <- 0 until 4) {
             for (col <- 0 until 10) {
@@ -60,8 +60,8 @@ object BrickBreaker extends JazzFramework
                 Create roundRectangle rr und
                     a size (35, 15) und
                     a arcSize (5, 3)
-                'e1 addShape rr at (25 + col * 35, 25 + row * 15)
-                'c1 interaction (rr, destroyAndBouncePlayerLeft)
+                'e1 add rr at (25 + col * 35, 25 + row * 15)
+                'c1 interaction (rr, destroyAndBouncePlayerLeft _)
             }
         }
 
@@ -71,16 +71,16 @@ object BrickBreaker extends JazzFramework
                 Create roundRectangle rr und
                     a size (35, 15) und
                     a arcSize (5, 3)
-                'e2 addShape rr at (25 + col * 35, 25 + row * 15)
-                'c2 interaction (rr, destroyAndBouncePlayerRight)
+                'e2 add rr at (25 + col * 35, 25 + row * 15)
+                'c2 interaction (rr, destroyAndBouncePlayerRight _)
             }
         }
 
-        'e1 addShape 'c1 und
-            an addShape 'p1
+        'e1 add 'c1 und
+            an add 'p1
 
-        'e2 addShape 'c2 und
-            an addShape 'p2
+        'e2 add 'c2 und
+            an add 'p2
 
         // define the frame
 
@@ -91,10 +91,10 @@ object BrickBreaker extends JazzFramework
             a color GameCons.green
 
         Create button 'new_game_button mit
-            a buttonText "New Game"
+            a text "New Game"
         'menu_bar(0) = 'new_game_button
-        'menu_bar(1) = Create button 'options_button buttonText "Options"
-        'menu_bar(2) = Create button 'help_button buttonText "Help"
+        'menu_bar(1) = Create button 'options_button text "Options"
+        'menu_bar(2) = Create button 'help_button text "Help"
 
         'center_panel(0) = 'e1
         'center_panel(1) = 'e2
@@ -104,12 +104,12 @@ object BrickBreaker extends JazzFramework
         'side_panel(0) = Create label 'high_scores_label
 
         Create label 'credits_label mit
-            a labelText "Copyright your mom"
+            a text "Copyright your mom"
         'side_panel(1) = 'credits_label
         'side_panel(2) = Create label 'left_score mit
-            a labelText "Left player score: " + left_score
+            a text "Left player score: " + left_score
         'side_panel(3) = Create label 'right_score mit
-            a labelText "Right player score: " + right_score
+            a text "Right player score: " + right_score
 
         Run
     }
@@ -118,14 +118,14 @@ object BrickBreaker extends JazzFramework
         destroy(actor, actee)
         bounce(actor, actee)
         left_score += 1
-        'left_score labelText "Left player score: " + left_score
+        'left_score text "Left player score: " + left_score
     }
 
     def destroyAndBouncePlayerRight(actor: Shape, actee: Shape) {
         destroy(actor, actee)
         bounce(actor, actee)
         right_score += 1
-        'right_score labelText "Right player score: " + right_score
+        'right_score text "Right player score: " + right_score
     }
 
     def bounce(actor: Shape, actee: Shape) {
