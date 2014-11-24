@@ -10,8 +10,8 @@ public class SplitPanel extends JPanel {
 	public SplitPanel(int numChildren, boolean isHorizontal) {
 		GroupLayout layout = new GroupLayout(this);
 		setLayout(layout);
-		layout.setAutoCreateGaps(true);
-		layout.setAutoCreateContainerGaps(true);
+		//layout.setAutoCreateGaps(true);
+		//layout.setAutoCreateContainerGaps(true);
 
 		children = new JPanel[numChildren];
 		initialized = new boolean[numChildren];
