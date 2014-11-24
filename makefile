@@ -1,5 +1,5 @@
 java:
-	javac -classpath /usr/share/java/scala/scala-library.jar:target/classes \
+	javac -classpath /usr/share/scala/lib/scala-library.jar:target/classes \
 	       drawings/*.java
 
 scala:

@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.util.*;
 
+import scala.runtime.AbstractFunction1;
+
 /**
  * AnimatingChild is an object that supports animation
  * 
@@ -17,6 +19,7 @@ abstract public class AnimatingChild
     protected int speed = 0;
     protected boolean active = false;
     protected HashMap<AnimatingChild, Set<Integer>> interactions = new HashMap<AnimatingChild, Set<Integer>>();
+    protected AbstractFunction1<AnimatingChild, Boolean> callback;
 
     /**
      * Animates the object by changing very small details, (such as size, position, or color), that affect the drawing of the object
@@ -53,6 +56,10 @@ abstract public class AnimatingChild
         this.speed = speed;
     }
 
+    public void setCallback(AbstractFunction1<AnimatingChild, Boolean> c) {
+        callback = c;
+    }
+
     public int getDirection() {
         return direction;
     }
@@ -75,14 +82,14 @@ abstract public class AnimatingChild
         }
     }
 
-    public HashMap<AnimatingChild, Set<Integer>> getInteractions() {
-        return interactions;
-    }
-
     public boolean intersects(AnimatingChild other) {
         Rectangle2D.Double t = getBounds();
         Rectangle2D.Double o = other.getBounds();
 
         return t.intersects(o.x, o.y, o.width, o.height);
+    }
+
+    public void doInteractions(AnimatingChild other) {
+        callback.apply(other);
     }
 }

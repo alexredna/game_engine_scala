@@ -32,7 +32,7 @@ object BrickBreaker extends GameEnvironment
 			a color GameCons.burnt_orange
 		'e add 'r at (400, 400)
 
-		'c1 interaction ('c2, GameCons.destroys)
+		'c1 interaction ('c2, destroys)
 		
 		'e onKeyPress (KeyEvent.VK_LEFT, 'move_left, 'r)
 		'e onKeyPress (KeyEvent.VK_RIGHT, 'move_right, 'r)

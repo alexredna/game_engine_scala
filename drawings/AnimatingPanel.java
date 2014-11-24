@@ -6,7 +6,7 @@ import java.awt.image.*;
 import java.util.*;
 import javax.swing.*;
 
-public class AnimatingPanel extends JPanel implements Runnable, KeyListener
+public class AnimatingPanel extends JPanel implements Runnable
 {
     // -----------------------------------------------------------------
     // all of these variables deal with the animation
@@ -26,60 +26,20 @@ public class AnimatingPanel extends JPanel implements Runnable, KeyListener
     private JFrame frame;
     // children
     private java.util.List<AnimatingChild> children;
-    // key binding
-    private HashMap<Integer, HashMap<AnimatingChild, JavaAction>> bindings;
 
     public AnimatingPanel(JFrame frame)
     {
         this.frame = frame;
 
         children = Collections.synchronizedList(new ArrayList<AnimatingChild>());
-        bindings = new HashMap<Integer, HashMap<AnimatingChild, JavaAction>>();
 
         /* add Mouse, MouseMotion, Component, and Key Listeners here (optional) */
-        frame.addKeyListener(this);
         requestFocus();
     }
 
     public void addChild(AnimatingChild child) {
         children.add(child);
     }
-
-    public void addKeyBinding(int key, JavaAction action, AnimatingChild child) {
-        if (!bindings.containsKey(key)) {  
-            HashMap<AnimatingChild, JavaAction> childList = new HashMap<AnimatingChild, JavaAction>();
-            childList.put(child, action);
-            bindings.put(key, childList);
-        } else {
-            HashMap<AnimatingChild, JavaAction> childList = bindings.get(key);
-            childList.put(child, action);
-            bindings.put(key, childList);
-        }
-    }
-
-    public void keyPressed(KeyEvent e) {
-        int key = e.getKeyCode();
-        if (!bindings.containsKey(key))
-            return;
-        HashMap<AnimatingChild, JavaAction> childList = bindings.get(key);
-        for (AnimatingChild child : childList.keySet()) {
-            JavaAction action = childList.get(child);
-            action.performPress(child);
-        }
-    }
-
-    public void keyReleased(KeyEvent e) {
-        int key = e.getKeyCode();
-        if (!bindings.containsKey(key))
-            return;
-        HashMap<AnimatingChild, JavaAction> childList = bindings.get(key);
-        for (AnimatingChild child : childList.keySet()) {
-            JavaAction action = childList.get(child);
-            action.performRelease(child);
-        }
-    }
-
-    public void keyTyped(KeyEvent e) { }
 
     public void startAnimation()
     {
@@ -146,12 +106,11 @@ public class AnimatingPanel extends JPanel implements Runnable, KeyListener
             while (it2.hasNext()) {
                 AnimatingChild c = it2.next();
 
-                for (AnimatingChild other: c.getInteractions().keySet()) {
-                    if (c.intersects(other)) {
-                        /*Rectangle2D.Double cross = c.createIntersection(other);
-                        c.getInteractions.get()
-                        listener(c, other, )*/
-                    }
+                ListIterator<AnimatingChild> it3 = children.listIterator();
+                while (it3.hasNext()) {
+                    AnimatingChild other = it3.next();
+                    if (!c.equals(other) && c.intersects(other))
+                        c.doInteractions(other);
                 }
             }
         }
