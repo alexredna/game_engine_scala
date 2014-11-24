@@ -9,6 +9,7 @@ import scala.collection.mutable.Map
 import scala.language.implicitConversions
 
 import java.awt.Color
+import java.awt.event._
 
 class GameEnvironment {
 
@@ -90,6 +91,10 @@ class GameEnvironment {
 			this
 		}
 
+		def interaction(inter: (Shape, Int)) = {
+			fetch().setInteraction(inter._1.fetch(), inter._2)
+		}
+
 		def mit(t: Article): Shape = this
 		def und(t: Article): Shape = this
 		override def toString(): String = fetch().toString()
@@ -145,6 +150,8 @@ class GameEnvironment {
 		else
 			println("Unbound variable")
 	}
+
+	//def ActionPerformed()
 
 	implicit def symbol2Shape(s: Symbol) = Shape(s)
 	implicit def symbol2Environment(s: Symbol) = Environment(s)
