@@ -21,6 +21,11 @@ object BrickBreaker extends GameEnvironment
 			a color GameCons.blue und
 			a velocity (GameCons.east, GameCons.slow)
 		'e add 'c1
+		Create circle 'c3 mit
+			a location (42, 42)
+		Create circle 'c4 mit
+			a location (75, 75)
+		Create circle 'c5
 
 		Create circle 'c2 mit
 			a location (700, 12) und
