@@ -3,7 +3,6 @@ import drawings.AnimatingChild
 import drawings.AnimatingPanel
 import drawings.Frame
 import drawings.Rectangle
-import drawings.JavaAction
 import drawings.SplitPanel
 import drawings.RoundRectangle
 
@@ -24,8 +23,8 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 	var shape_bindings = Map[Symbol, AnimatingChild]()
 	var animating_child_to_symbol = Map[AnimatingChild, Symbol]()
 	var environment_bindings = Map[Symbol, AnimatingPanel]()
-	var action_bindings = Map[Symbol, JavaAction]()
-	var key_bindings = Map[Int, Map[AnimatingChild, JavaAction]]()
+	var key_press_bindings   = Map[Int, Map[Shape, Shape => Unit]]()
+	var key_release_bindings = Map[Int, Map[Shape, Shape => Unit]]()
 	var interaction_bindings = Map[Shape, Map[Shape, Set[(Shape, Shape) => Unit]]]()
 
 	var panel_bindings = Map[Symbol, SplitPanel]()
@@ -34,8 +33,8 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 
 	def isBound(s: Symbol): Boolean =
 		shape_bindings.contains(s) || environment_bindings.contains(s) ||
-		action_bindings.contains(s) || panel_bindings.contains(s) ||
-		button_bindings.contains(s) || label_bindings.contains(s)
+		panel_bindings.contains(s) || button_bindings.contains(s) ||
+		label_bindings.contains(s)
 
 	object Create {
 		def environment(s: Symbol): Environment = {
@@ -44,14 +43,6 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 			val ap = new AnimatingPanel(frame)
 			environment_bindings += (s -> ap)
 			Environment(s)
-		}
-
-		def action(s: Symbol): Action = {
-			if (isBound(s))
-				sys.error("Variable " + s + " is already bound.")
-			val a = new JavaAction(s.name);
-			action_bindings += (s -> a)
-			Action(s)
 		}
 
 		def circle(s: Symbol): Shape = {
@@ -139,13 +130,24 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 			this
 		}
 
-		def onKeyPress(key: Int, action: Action, child: Shape): Environment = {
-			if (!key_bindings.contains(key)) {
-				var behavior = Map[AnimatingChild, JavaAction]()
-				behavior += (child.fetch() -> action.fetch())
-				key_bindings += (key -> behavior)
+		def onKeyPress(key: Int, action: Shape => Unit, child: Shape): Environment = {
+			if (!key_press_bindings.contains(key)) {
+				var action_set = Map[Shape, Shape => Unit]()
+				action_set += (child -> action)
+				key_press_bindings += (key -> action_set)
 			} else {
-				key_bindings.get(key).get += (child.fetch() -> action.fetch())
+				key_press_bindings.get(key).get += (child -> action)
+			}
+			this
+		}
+
+		def onKeyRelease(key: Int, action: Shape => Unit, child: Shape): Environment = {
+			if (!key_release_bindings.contains(key)) {
+				var action_set = Map[Shape, Shape => Unit]()
+				action_set += (child -> action)
+				key_release_bindings += (key -> action_set)
+			} else {
+				key_release_bindings.get(key).get += (child -> action)
 			}
 			this
 		}
@@ -235,31 +237,6 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 		def mit(t: Article): Shape = this
 		def und(t: Article): Shape = this
 		override def toString(): String = fetch().toString()
-	}
-
-	case class Action(s: Symbol) {
-		var isOnPress: Boolean = false
-		def fetch(): JavaAction = action_bindings.get(s).get
-
-		def color(c: Color): Action = {
-			fetch().activateColor(c, isOnPress)
-			this
-		}
-
-		def velocity(direction: Int, speed: Int): Action = {
-			fetch().activateVelocity(direction, speed, isOnPress)
-			this
-		}
-
-		def mit(t: ActionTiming): Action = {
-			isOnPress = t == onPress;
-			this
-		}
-		def und(t: ActionTiming): Action = {
-			isOnPress = t == onPress;
-			this
-		}
-		override def toString(): String = "Action " + s
 	}
 
 	object ScalaFrame {
@@ -408,9 +385,6 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 	class Article
 	val a = new Article()
 	val an = new Article()
-	class ActionTiming
-	val onPress = new ActionTiming()
-	val onRelease = new ActionTiming()
 
 	// need to add for all classes/objectsScala
 	def about(s: Symbol) {
@@ -418,32 +392,29 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 			println(Shape(s))
 		else if (environment_bindings.contains(s))
 			println(Environment(s))
-		else if (action_bindings.contains(s))
-			println(Action(s))
 		else
 			println("Unbound variable")
 	}
 
 	implicit def symbol2Shape(s: Symbol) = Shape(s)
 	implicit def symbol2Environment(s: Symbol) = Environment(s)
-	implicit def symbol2Action(s: Symbol) = Action(s)
 	implicit def symbol2Panel(s: Symbol) = ScalaPanel(s)
 	implicit def symbol2Button(s: Symbol) = ScalaButton(s)
 	implicit def symbol2Label(s: Symbol) = ScalaLabel(s)
 
 	def keyPressed(e: KeyEvent) {
 		var key: Int = e.getKeyCode()
-		if (key_bindings.contains(key)) {
-			var childList = key_bindings.get(key).get
-			childList.foreach {case(key, value) => value.performPress(key)}
+		if (key_press_bindings.contains(key)) {
+			var shape_list = key_press_bindings.get(key).get
+			shape_list.foreach { case(shape, func) => func(shape) }
 		}
 	}
 
 	def keyReleased(e: KeyEvent) {
 		var key: Int = e.getKeyCode()
-		if (key_bindings.contains(key)) {
-			var childList = key_bindings.get(key).get
-			childList.foreach {case(key, value) => value.performRelease(key)}
+		if (key_release_bindings.contains(key)) {
+			var shape_list = key_release_bindings.get(key).get
+			shape_list.foreach { case(shape, func) => func(shape) }
 		}
 	}
 

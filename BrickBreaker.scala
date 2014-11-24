@@ -4,18 +4,6 @@ object BrickBreaker extends GameEnvironment
 {
 	def main(args: Array[String])
 	{
-		// define all actions
-		Create action 'change_color mit
-			onPress color GameCons.burnt_orange
-
-		Create action 'move_left mit
-			onPress velocity (GameCons.west, 10) und
-			onRelease velocity (0, 0)
-
-		Create action 'move_right mit
-			onPress velocity (GameCons.east, 10) und
-			onRelease velocity (0, 0)
-
 		// define all shapes
 
 		Create circle 'c1 mit
@@ -38,14 +26,16 @@ object BrickBreaker extends GameEnvironment
 			a size (400, 600) und
 			an addShape 'c1 und
 			an addShape 'c2 und
-			an onKeyPress (KeyEvent.VK_SPACE, 'change_color, 'c2)
+			an onKeyPress (KeyEvent.VK_SPACE, change_color, 'c2)
 
 		Create environment 'e2 mit
 			a size (400, 600) und
 			an addShape 'r at (200, 200) und
 			an addShape 'rr at (300, 300) und
-			an onKeyPress (KeyEvent.VK_LEFT, 'move_left, 'r) und
-			an onKeyPress (KeyEvent.VK_RIGHT, 'move_right, 'r)
+			an onKeyPress   (KeyEvent.VK_LEFT, move_left, 'r) und
+			an onKeyRelease (KeyEvent.VK_LEFT, stop_moving, 'r) und
+			an onKeyPress   (KeyEvent.VK_RIGHT, move_right, 'r) und
+			an onKeyRelease (KeyEvent.VK_RIGHT, stop_moving, 'r)
 
 		// define the frame
 
@@ -88,5 +78,22 @@ object BrickBreaker extends GameEnvironment
 
 	def destroys(actor: Shape, actee: Shape) {
 		println(actor + " destroys " + actee)
+		actor color GameCons.red
+	}
+
+	def change_color(actor: Shape) {
+		actor color GameCons.green
+	}
+
+	def move_left(actor: Shape) {
+		actor velocity (GameCons.west, 10)
+	}
+
+	def move_right(actor: Shape) {
+		actor velocity (GameCons.east, 10)
+	}
+
+	def stop_moving(actor: Shape) {
+		actor velocity (0, 0)
 	}
 }

@@ -132,6 +132,11 @@ public class AnimatingPanel extends JPanel implements Runnable
                 dbg2 = dbImage.createGraphics();
         }
 
+        // use anti-aliasing when possible
+        dbg2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        // anti-alias text too
+        dbg2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
         // Clear buffered image first with all white
         dbg2.setColor(Color.WHITE);
         dbg2.fillRect(0, 0, getWidth(), getHeight());
