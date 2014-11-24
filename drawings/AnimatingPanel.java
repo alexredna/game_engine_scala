@@ -1,12 +1,17 @@
 package drawings;
 
 import java.awt.*;
-import java.awt.event.*;
+import java.beans.*;
 import java.awt.image.*;
 import java.util.*;
 import javax.swing.*;
 
-public class AnimatingPanel extends JPanel implements Runnable, KeyListener
+/**
+ * AnimatingPanel
+ * 
+ * @author Nick Walther
+ */
+public class AnimatingPanel extends JPanel implements Runnable
 {
     // -----------------------------------------------------------------
     // all of these variables deal with the animation
@@ -26,60 +31,19 @@ public class AnimatingPanel extends JPanel implements Runnable, KeyListener
     private JFrame frame;
     // children
     private java.util.List<AnimatingChild> children;
-    // key binding
-    private HashMap<Integer, HashMap<AnimatingChild, JavaAction>> bindings;
 
     public AnimatingPanel(JFrame frame)
     {
         this.frame = frame;
 
         children = Collections.synchronizedList(new ArrayList<AnimatingChild>());
-        bindings = new HashMap<Integer, HashMap<AnimatingChild, JavaAction>>();
 
-        /* add Mouse, MouseMotion, Component, and Key Listeners here (optional) */
-        frame.addKeyListener(this);
         requestFocus();
     }
 
     public void addChild(AnimatingChild child) {
         children.add(child);
     }
-
-    public void addKeyBinding(int key, JavaAction action, AnimatingChild child) {
-        if (!bindings.containsKey(key)) {  
-            HashMap<AnimatingChild, JavaAction> childList = new HashMap<AnimatingChild, JavaAction>();
-            childList.put(child, action);
-            bindings.put(key, childList);
-        } else {
-            HashMap<AnimatingChild, JavaAction> childList = bindings.get(key);
-            childList.put(child, action);
-            bindings.put(key, childList);
-        }
-    }
-
-    public void keyPressed(KeyEvent e) {
-        int key = e.getKeyCode();
-        if (!bindings.containsKey(key))
-            return;
-        HashMap<AnimatingChild, JavaAction> childList = bindings.get(key);
-        for (AnimatingChild child : childList.keySet()) {
-            JavaAction action = childList.get(child);
-            action.performPress(child);
-        }
-    }
-
-    public void keyReleased(KeyEvent e) {
-        int key = e.getKeyCode();
-        if (!bindings.containsKey(key))
-            return;
-        HashMap<AnimatingChild, JavaAction> childList = bindings.get(key);
-        for (AnimatingChild child : childList.keySet()) {
-            JavaAction action = childList.get(child);
-            action.performRelease(child);
-        }
-    }
-
-    public void keyTyped(KeyEvent e) { }
 
     public void startAnimation()
     {
@@ -137,9 +101,22 @@ public class AnimatingPanel extends JPanel implements Runnable, KeyListener
     {
         /** Call upon all children the animate method */
         synchronized (children) {
-            ListIterator<AnimatingChild> it = children.listIterator();
-            while (it.hasNext()) {
-                it.next().animate();
+            ListIterator<AnimatingChild> it1 = children.listIterator();
+            while (it1.hasNext()) {
+                it1.next().animate();
+            }
+
+            ListIterator<AnimatingChild> it2 = children.listIterator();
+            while (it2.hasNext()) {
+                AnimatingChild c = it2.next();
+
+                ListIterator<AnimatingChild> it3 = children.listIterator();
+                while (it3.hasNext()) {
+                    AnimatingChild other = it3.next();
+                    if (!c.equals(other) && c.intersects(other))
+                        frame.getPropertyChangeListeners()[0].propertyChange(
+                            new PropertyChangeEvent(frame, "Interaction", c, other));
+                }
             }
         }
     }
@@ -178,7 +155,8 @@ public class AnimatingPanel extends JPanel implements Runnable, KeyListener
             Toolkit.getDefaultToolkit().sync();
             g.dispose();
         } catch (Exception e) {
-            System.out.println("Graphics context error: " + e);
+            System.err.println("Error: Environment created but not added to frame.");
+            //System.out.println("Graphics context error: " + e);
             System.exit(0);
         }
     }

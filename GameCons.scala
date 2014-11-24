@@ -22,8 +22,4 @@ object GameCons {
 	val north = 90
 	val west = 180
 	val south = 270
-
-	val ignores = 0
-	val bounces = 1
-	val destroys = 2
 }

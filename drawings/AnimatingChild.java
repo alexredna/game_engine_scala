@@ -2,6 +2,7 @@ package drawings;
 
 import java.awt.*;
 import java.awt.geom.*;
+import java.util.*;
 
 /**
  * AnimatingChild is an object that supports animation
@@ -15,6 +16,7 @@ abstract public class AnimatingChild
     protected int direction = 0;
     protected int speed = 0;
     protected boolean active = false;
+
     /**
      * Animates the object by changing very small details, (such as size, position, or color), that affect the drawing of the object
      */
@@ -25,8 +27,6 @@ abstract public class AnimatingChild
      * @param g2 The Graphics2D object used to draw upon
      */
     abstract public void draw(Graphics2D g2);
-
-    abstract public boolean intersects(AnimatingChild ac);
 
     abstract protected Rectangle2D.Double getBounds();
 
@@ -62,5 +62,12 @@ abstract public class AnimatingChild
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean intersects(AnimatingChild other) {
+        Rectangle2D.Double t = getBounds();
+        Rectangle2D.Double o = other.getBounds();
+
+        return t.intersects(o.x, o.y, o.width, o.height);
     }
 }
