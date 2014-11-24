@@ -29,7 +29,7 @@ abstract public class AnimatingChild
      */
     abstract public void draw(Graphics2D g2);
 
-    abstract protected Rectangle2D.Double getBounds();
+    abstract public Rectangle2D.Double getBounds();
 
     public void setLocation(double x, double y) {
         this.x = x;

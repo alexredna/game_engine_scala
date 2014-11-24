@@ -10,8 +10,9 @@ import scala.collection.mutable.Map
 import scala.language.implicitConversions
 import scala.runtime._
 
-import java.awt.event._
 import java.awt._
+import java.awt.event._
+import java.awt.geom._
 import java.beans._
 import javax.swing._
 
@@ -144,6 +145,11 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
             case default => methodError("at"); this
         }
 
+        def bounds(): (Double, Double, Double, Double) = this match {
+            case j: Shape => j.g_bounds()
+            case default => methodError("location"); (0, 0, 0, 0)
+        }
+
         def color(color: Color): JazzElement = this match {
             case j: Shape => j._color(color)
             case j: ScalaPanel => j._color(color)
@@ -160,6 +166,10 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
         def location(x: Double, y: Double): JazzElement = this match {
             case j: Shape => j._location(x, y)
             case default => methodError("location"); this
+        }
+        def location(): (Double, Double) = this match {
+            case j: Shape => j.g_location()
+            case default => methodError("location"); (0, 0)
         }
 
         def onKeyPress(key: Int, action: Shape => Unit, s: Symbol): JazzElement =
@@ -209,6 +219,10 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
         def velocity(direction: Double, speed: Double): JazzElement = this match {
             case j: Shape => j._velocity(direction, speed)
             case default => methodError("velocity"); this
+        }
+        def velocity(): (Double, Double) = this match {
+            case j: Shape => j.g_velocity()
+            case default => methodError("velocity"); (0, 0)
         }
 
         def visible(visible: Boolean): JazzElement = this match {
@@ -272,17 +286,28 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
             this
         }
 
-        //def mit(t: Article): Environment = this
-        //def und(t: Article): Environment = this
         def _toString(): String = "Environment " + s
     }
 
     case class Shape(s: Symbol) extends JazzElement(s) {
         def fetch(): AnimatingChild = shape_bindings.get(s).get
 
-        def _location(x: Double, y: Double): Shape = {
-            fetch().setLocation(x, y)
+        def _active(active: Boolean): Shape = {
+            fetch().setActive(active)
             this
+        }
+
+        def _arcSize(width: Double, height: Double): Shape = {
+            fetch() match {
+                case rr: RoundRectangle => rr.setArcSize(width, height)
+                case default => sys.error("Can only change the arcSize on a round rectangle")
+            }
+            this
+        }
+
+        def g_bounds(): (Double, Double, Double, Double) = {
+            var r: Rectangle2D.Double = fetch().getBounds()
+            (r.x, r.y, r.width, r.height)
         }
 
         def _color(color: Color): Shape = {
@@ -290,10 +315,29 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
             this
         }
 
-        def _velocity(direction: Double, speed: Double): Shape = {
-            if (direction < 0 || direction > 360)
-                sys.error("Invalid direction for velocity")
-            fetch().setVelocity(direction, speed)
+        def _location(x: Double, y: Double): Shape = {
+            fetch().setLocation(x, y)
+            this
+        }
+        def g_location(): (Double, Double) = {
+            var p: Point2D.Double = fetch().getLocation()
+            (p.x, p.y)
+        }
+
+        def _interaction(s: Shape, func: (Shape, Shape) => Unit): Shape = {
+            if (!interaction_bindings.contains(this))
+                interaction_bindings += (this -> Map[Shape, Set[(Shape, Shape) => Unit]]())
+
+            val my_bindings = interaction_bindings.get(this).get
+
+            if (!my_bindings.contains(s)) {
+                val behaviors = Set(func)
+                my_bindings += (s -> behaviors)
+            } else {
+                val behaviors = my_bindings.get(s).get
+                my_bindings += (s -> (behaviors + func))
+            }
+            interaction_bindings += (this -> my_bindings)
             this
         }
 
@@ -314,43 +358,19 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
             this
         }
 
-        def _arcSize(width: Double, height: Double): Shape = {
-            fetch() match {
-                case rr: RoundRectangle => rr.setArcSize(width, height)
-                case default => sys.error("Can only change the arcSize on a round rectangle")
-            }
+        def _velocity(direction: Double, speed: Double): Shape = {
+            if (direction < 0 || direction > 360)
+                sys.error("Invalid direction for velocity")
+            fetch().setVelocity(direction, speed)
             this
         }
-
-        def _active(active: Boolean): Shape = {
-            fetch().setActive(active)
-            this
-        }
+        def g_velocity(): (Double, Double) = (fetch().getDirection(), fetch().getSpeed())
 
         def _visible(visible: Boolean): Shape = {
             fetch().setVisible(visible)
             this
         }
 
-        def _interaction(s: Shape, func: (Shape, Shape) => Unit): Shape = {
-            if (!interaction_bindings.contains(this))
-                interaction_bindings += (this -> Map[Shape, Set[(Shape, Shape) => Unit]]())
-
-            val my_bindings = interaction_bindings.get(this).get
-
-            if (!my_bindings.contains(s)) {
-                val behaviors = Set(func)
-                my_bindings += (s -> behaviors)
-            } else {
-                val behaviors = my_bindings.get(s).get
-                my_bindings += (s -> (behaviors + func))
-            }
-            interaction_bindings += (this -> my_bindings)
-            this
-        }
-
-        //def mit(t: Article): Shape = this
-        //def und(t: Article): Shape = this
         def _toString(): String = fetch().toString()
     }
 
@@ -451,8 +471,6 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
             fetch().setChild(index, comp)
         }
 
-        //def mit(t: Article): ScalaPanel = this
-        //def und(t: Article): ScalaPanel = this
         def _toString(): String = "ScalaPanel()"
     }
 
@@ -464,8 +482,6 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
             this
         }
 
-        //def mit(t: Article): ScalaButton = this
-        //def und(t: Article): ScalaButton = this
         def _toString(): String = "ScalaButton(" + fetch().getText() + ")"
     }
 
@@ -477,8 +493,6 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
             this
         }
 
-        //def mit(t: Article): ScalaLabel = this
-        //def und(t: Article): ScalaLabel = this
         def _toString(): String = "ScalaLabel(" + fetch().getText() + ")"
     }
 
@@ -521,15 +535,6 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
             sys.error("Variable " + s + " not found")
         element
     }
-
-
-    //implicit def symbol2JazzElement(s: Symbol) = new JazzElement(s)
-
-    //implicit def symbol2Shape(s: Symbol) = Shape(s)
-    //implicit def symbol2Environment(s: Symbol) = Environment(s)
-    //implicit def symbol2Panel(s: Symbol) = ScalaPanel(s)
-    //implicit def symbol2Button(s: Symbol) = ScalaButton(s)
-    //implicit def symbol2Label(s: Symbol) = ScalaLabel(s)
 
     def keyPressed(e: KeyEvent) {
         var key: Int = e.getKeyCode()

@@ -40,7 +40,7 @@ public class Circle extends AnimatingChild
         }
     }
 
-    protected Rectangle2D.Double getBounds() {
+    public Rectangle2D.Double getBounds() {
         return new Rectangle2D.Double(x, y, radius, radius);
     }
 

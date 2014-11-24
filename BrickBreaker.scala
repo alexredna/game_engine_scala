@@ -1,4 +1,6 @@
 import java.awt.event.KeyEvent
+import java.awt.geom.Line2D
+import scala.language.postfixOps
 
 object BrickBreaker extends JazzFramework
 {
@@ -13,14 +15,14 @@ object BrickBreaker extends JazzFramework
             a location (188, 500) und
             a radius 25 und
             a color GameCons.blue und
-            a velocity (GameCons.north, 10) und
+            a velocity (GameCons.north, 1) und
             an active true
 
         Create circle 'c2 mit
             a location (188, 500) und
             a radius 25 und
             a color GameCons.cyan und
-            a velocity (75, 10) und
+            a velocity (75, 1) und
             an active true
 
         Create rectangle 'p1 mit
@@ -60,6 +62,12 @@ object BrickBreaker extends JazzFramework
                 Create roundRectangle rr und
                     a size (35, 15) und
                     a arcSize (5, 3)
+                row match {
+                    case 0 => rr color GameCons.red
+                    case 1 => rr color GameCons.blue
+                    case 2 => rr color GameCons.green
+                    case 3 => rr color GameCons.yellow
+                }
                 'e1 add rr at (25 + col * 35, 25 + row * 15)
                 'c1 interaction (rr, destroyAndBouncePlayerLeft _)
             }
@@ -71,6 +79,12 @@ object BrickBreaker extends JazzFramework
                 Create roundRectangle rr und
                     a size (35, 15) und
                     a arcSize (5, 3)
+                row match {
+                    case 0 => rr color GameCons.red
+                    case 1 => rr color GameCons.blue
+                    case 2 => rr color GameCons.green
+                    case 3 => rr color GameCons.yellow
+                }
                 'e2 add rr at (25 + col * 35, 25 + row * 15)
                 'c2 interaction (rr, destroyAndBouncePlayerRight _)
             }
@@ -129,11 +143,54 @@ object BrickBreaker extends JazzFramework
     }
 
     def bounce(actor: Shape, actee: Shape) {
-        println(actor + " bounces " + actee)
+        //println(actor + " bounces " + actee)
+        val (ax: Double, ay: Double, aw: Double, ah: Double) = actor bounds;
+        val midax = ax + (aw - ax) / 2
+        val miday = ay + (ah - ay) / 2
+        val (ad: Double, av: Double) = actor velocity;
+        val vector: Line2D.Double = new Line2D.Double(
+            midax - 2 * av * Math.cos(Math.toRadians(ad)), // 200 arbitrary
+            miday - 2 * av * Math.sin(Math.toRadians(ad)),
+            midax + 2 * av * Math.cos(Math.toRadians(ad)),
+            miday + 2 * av * Math.sin(Math.toRadians(ad)))
+        val (bx: Double, by: Double, bw: Double, bh: Double) = actee bounds;
+        val leftSide   = new Line2D.Double(bx, by, bx, by + bh)
+        val bottomSide = new Line2D.Double(bx, by + bh, bx + bw, by + bh)
+        val rightSide  = new Line2D.Double(bx + bw, by + bh, bx + bw, by)
+        val topSide    = new Line2D.Double(bx + bw, by, bx, by)
+
+        //println(ax + ", " + ay + ", " + aw + ", " + ah + ", " + ad + ", " + av)
+        //println(bx + ", " + by + ", " + bw + ", " + bh + ", " + bd + ", " + bv)
+        var newDirection: Double = 0;
+        if (ad % 90 == 0)
+            newDirection = ad + 180
+        else if (ad > 0 && ad < 90) {
+            if (vector.intersectsLine(leftSide))
+                newDirection = ad + 90
+            else if (vector.intersectsLine(bottomSide))
+                newDirection = ad + 270 // same as -90
+        } else if (ad > 90 && ad < 180) {
+            if (vector.intersectsLine(bottomSide))
+                newDirection = ad + 90
+            else if (vector.intersectsLine(rightSide))
+                newDirection = ad - 90
+        } else if (ad > 180 && ad < 270) {
+            if (vector.intersectsLine(rightSide))
+                newDirection = ad + 90
+            else if (vector.intersectsLine(topSide))
+                newDirection = ad - 90
+        } else if (ad > 270 && ad < 360) {
+            if (vector.intersectsLine(topSide))
+                newDirection = ad + 90
+            else if (vector.intersectsLine(leftSide))
+                newDirection = ad - 90
+        }
+        newDirection = newDirection % 360
+        println(ad + ", " + newDirection)
+        actor velocity (newDirection, av)
     }
 
     def destroy(actor: Shape, actee: Shape) {
-        println(actor + " destroys " + actee)
         actee visible false
     }
 
