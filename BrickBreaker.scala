@@ -79,11 +79,11 @@ object BrickBreaker extends GameEnvironment
 		Run
 	}
 
-	def bounces(s: Shape) {
-		println("bounces")
+	def bounces(actor: Shape, actee: Shape) {
+		println(actor + " bounces " + actee)
 	}
 
-	def destroys(s: Shape) {
-		println("destroys")
+	def destroys(actor: Shape, actee: Shape) {
+		println(actor + " destroys " + actee)
 	}
 }

@@ -21,9 +21,11 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 	frame.addPropertyChangeListener(this)
 
 	var shape_bindings = Map[Symbol, AnimatingChild]()
+	var animating_child_to_symbol = Map[AnimatingChild, Symbol]()
 	var environment_bindings = Map[Symbol, AnimatingPanel]()
 	var action_bindings = Map[Symbol, JavaAction]()
 	var key_bindings = Map[Int, Map[AnimatingChild, JavaAction]]()
+	var interaction_bindings = Map[Shape, Map[Shape, Set[(Shape, Shape) => Unit]]]()
 
 	var panel_bindings = Map[Symbol, SplitPanel]()
 	var button_bindings = Map[Symbol, JButton]()
@@ -56,6 +58,7 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 				sys.error("Variable " + s + " is already bound.")
 			val c = new Circle()
 			shape_bindings += (s -> c)
+			animating_child_to_symbol += (c -> s)
 			Shape(s)
 		}
 
@@ -64,6 +67,7 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 				sys.error("Variable " + s + " is already bound.")
 			val r = new Rectangle()
 			shape_bindings += (s -> r)
+			animating_child_to_symbol += (r -> s)
 			Shape(s)
 		}
 
@@ -142,8 +146,6 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 	}
 
 	case class Shape(s: Symbol) {
-		var interaction_bindings = Map[Shape, Set[Shape => Unit]]()
-
 		def fetch(): AnimatingChild = shape_bindings.get(s).get
 
 		def location(x: Int, y: Int): Shape = {
@@ -163,14 +165,20 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 			this
 		}
 
-		def interaction(s: Shape, func: Shape => Unit) = {
-			if (!interaction_bindings.contains(s)) {
+		def interaction(s: Shape, func: (Shape, Shape) => Unit) = {
+			if (!interaction_bindings.contains(this))
+				interaction_bindings += (this -> Map[Shape, Set[(Shape, Shape) => Unit]]())
+
+			val my_bindings = interaction_bindings.get(this).get
+
+			if (!my_bindings.contains(s)) {
 				val behaviors = Set(func)
-				interaction_bindings += (s -> behaviors)
+				my_bindings += (s -> behaviors)
 			} else {
-				val behaviors = interaction_bindings.get(s).get
-				interaction_bindings += (s -> (behaviors + func))
+				val behaviors = my_bindings.get(s).get
+				my_bindings += (s -> (behaviors + func))
 			}
+			interaction_bindings += (this -> my_bindings)
 			this
 		}
 
@@ -384,6 +392,22 @@ class GameEnvironment extends KeyListener with PropertyChangeListener {
 	def keyTyped(e: KeyEvent) { }
 
 	def propertyChange(event: PropertyChangeEvent) {
-		println("YAY!!!!!")
+		if (event.getPropertyName() != "Interaction")
+			return
+		val actorChild: AnimatingChild = event.getOldValue().asInstanceOf[AnimatingChild]
+		val acteeChild: AnimatingChild = event.getNewValue().asInstanceOf[AnimatingChild]
+		val actor: Shape = animating_child_to_symbol.get(actorChild).get
+		val actee: Shape = animating_child_to_symbol.get(acteeChild).get
+
+		if (!interaction_bindings.contains(actor))
+			return
+		val actor_bindings = interaction_bindings.get(actor).get
+		
+		if (!actor_bindings.contains(actee))
+			return
+		val funcs: Set[(Shape, Shape) => Unit] = actor_bindings.get(actee).get
+		for (func <- funcs) {
+			func(actor, actee)
+		}
 	}
 }
