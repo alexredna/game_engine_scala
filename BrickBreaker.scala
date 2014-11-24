@@ -48,7 +48,7 @@ object BrickBreaker extends GameEnvironment
 		// define the frame
 
 		ScalaFrame vsplit 2
-		ScalaFrame(0) = Create vPanel ('menu_bar, 7) mit
+		ScalaFrame(0) = Create hPanel ('menu_bar, 7) mit
 							a color GameCons.blue
 		ScalaFrame(1) = Create hPanel ('center_panel, 3) mit
 							a color GameCons.green
@@ -56,6 +56,8 @@ object BrickBreaker extends GameEnvironment
 		Create button 'new_game_button mit
 			a text "New Game"
 		'menu_bar(0) = 'new_game_button
+		'menu_bar(1) = Create button 'options_button text "Options"
+		'menu_bar(2) = Create button 'help_button text "Help"
 
 		'center_panel(0) = 'e1
 		'center_panel(1) = 'e2
