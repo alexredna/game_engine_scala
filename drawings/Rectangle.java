@@ -16,21 +16,18 @@ public class Rectangle extends AnimatingChild
         color = Color.BLACK;
     }
 
-	public void setWidth(double width) {
-		this.width = width;
-	}
+    public void setSize(double width, double height) {
+        this.width = width;
+        this.height = height;
+    }
 
-	public double getWidth() {
-		return this.width;
-	}
-
-	public void setHeight(double height) {
-		this.height = height;
-	}
-	
-	public double getHeight() {
-		return height;
-	}
+    public double getWidth() {
+        return this.width;
+    }
+    
+    public double getHeight() {
+        return height;
+    }
 
     public void animate()
     {   
@@ -42,15 +39,11 @@ public class Rectangle extends AnimatingChild
 
     public void draw(Graphics2D g2)
     {
-		if(visible) {
-        	Rectangle2D.Double rect = new Rectangle2D.Double(x, y, width, height);
-        	g2.setColor(color);
-        	g2.fill(rect);
-		}
-    }
-
-    public boolean intersects(AnimatingChild ac) {
-        return ac.getBounds().intersects(x, y, width, height);
+        if (visible) {
+            Rectangle2D.Double rect = new Rectangle2D.Double(x, y, width, height);
+            g2.setColor(color);
+            g2.fill(rect);
+        }
     }
 
     protected Rectangle2D.Double getBounds() {

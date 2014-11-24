@@ -1,99 +1,155 @@
-import java.awt.event.KeyEvent;
+import java.awt.event.KeyEvent
 
-object BrickBreaker extends GameEnvironment
+object BrickBreaker extends JazzFramework
 {
-	def main(args: Array[String])
-	{
-		// define all shapes
+    var left_score: Int = 0
+    var right_score: Int = 0
 
-		Create circle 'c1 mit
-			a location (12, 12) und
-			a color GameCons.blue und
-			a velocity (GameCons.east, GameCons.slow)
-		Create circle 'c2 mit
-			a location (300, 12) und
-			a color GameCons.cyan und
-			a velocity (GameCons.west, GameCons.slow)
+    def main(args: Array[String])
+    {
+        // define all shapes
 
-		Create rectangle 'r mit
-			a color GameCons.burnt_orange
-		Create roundRectangle 'rr mit
-			a location (300, 500)
+        Create circle 'c1 mit
+            a location (188, 500) und
+            a radius 25 und
+            a color GameCons.blue und
+            a velocity (GameCons.north, 10) und
+            an active true
 
-		// define all environments
+        Create circle 'c2 mit
+            a location (188, 500) und
+            a radius 25 und
+            a color GameCons.cyan und
+            a velocity (75, 10) und
+            an active true
 
-		Create environment 'e1 mit
-			a size (400, 600) und
-			an addShape 'c1 und
-			an addShape 'c2 und
-			an onKeyPress (KeyEvent.VK_SPACE, change_color, 'c2)
+        Create rectangle 'p1 mit
+            a location (160, 550) und
+            a size (80, 20) und
+            an active true
 
-		Create environment 'e2 mit
-			a size (400, 600) und
-			an addShape 'r at (200, 200) und
-			an addShape 'rr at (300, 300) und
-			an onKeyPress   (KeyEvent.VK_LEFT, move_left, 'r) und
-			an onKeyRelease (KeyEvent.VK_LEFT, stop_moving, 'r) und
-			an onKeyPress   (KeyEvent.VK_RIGHT, move_right, 'r) und
-			an onKeyRelease (KeyEvent.VK_RIGHT, stop_moving, 'r)
+        Create rectangle 'p2 mit
+            a location (160, 550) und
+            a size (80, 20) und
+            an active true
 
-		// define the frame
+        // interactions between already defined shapes
 
-		ScalaFrame vsplit 2
-		ScalaFrame(0) = Create hPanel ('menu_bar, 7) mit
-							a color GameCons.blue
-		ScalaFrame(1) = Create hPanel ('center_panel, 3) mit
-							a color GameCons.green
+        'c1 interaction ('p1, bounce)
+        'c2 interaction ('p2, bounce)
 
-		Create button 'new_game_button mit
-			a text "New Game"
-		'menu_bar(0) = 'new_game_button
-		'menu_bar(1) = Create button 'options_button text "Options"
-		'menu_bar(2) = Create button 'help_button text "Help"
+        // define all environments
 
-		'center_panel(0) = 'e1
-		'center_panel(1) = 'e2
-		'center_panel(2) = Create vPanel ('side_panel, 5) mit
-								a color GameCons.red
+        Create environment 'e1 mit
+            a size (400, 600) und
+            an onKeyPress   (KeyEvent.VK_A, move_left, 'p1) und
+            an onKeyRelease (KeyEvent.VK_A, stop_moving, 'p1) und
+            an onKeyPress   (KeyEvent.VK_D, move_right, 'p1) und
+            an onKeyRelease (KeyEvent.VK_D, stop_moving, 'p1)
 
-		'side_panel(0) = Create label 'high_scores_label
+        Create environment 'e2 mit
+            a size (400, 600) und
+            an onKeyPress   (KeyEvent.VK_LEFT, move_left, 'p2) und
+            an onKeyRelease (KeyEvent.VK_LEFT, stop_moving, 'p2) und
+            an onKeyPress   (KeyEvent.VK_RIGHT, move_right, 'p2) und
+            an onKeyRelease (KeyEvent.VK_RIGHT, stop_moving, 'p2)
 
-		Create label 'credits_label mit
-			a text "Copyright your mom"
-		'side_panel(1) = 'credits_label
+        for (row <- 0 until 4) {
+            for (col <- 0 until 10) {
+                var rr = Symbol("brick1" + row + col)
+                Create roundRectangle rr und
+                    a size (35, 15) und
+                    a arcSize (5, 3)
+                'e1 addShape rr at (25 + col * 35, 25 + row * 15)
+                'c1 interaction (rr, destroyAndBouncePlayerLeft)
+            }
+        }
 
-		'c1 interaction ('c2, destroys)
+        for (row <- 0 until 4) {
+            for (col <- 0 until 10) {
+                var rr = Symbol("brick2" + row + col)
+                Create roundRectangle rr und
+                    a size (35, 15) und
+                    a arcSize (5, 3)
+                'e2 addShape rr at (25 + col * 35, 25 + row * 15)
+                'c2 interaction (rr, destroyAndBouncePlayerRight)
+            }
+        }
 
-		start('c1)
-		start('c2)
-		start('r)
-		start('rr)
+        'e1 addShape 'c1 und
+            an addShape 'p1
 
-		Run
-	}
+        'e2 addShape 'c2 und
+            an addShape 'p2
 
-	def bounces(actor: Shape, actee: Shape) {
-		println(actor + " bounces " + actee)
-	}
+        // define the frame
 
-	def destroys(actor: Shape, actee: Shape) {
-		println(actor + " destroys " + actee)
-		actor color GameCons.red
-	}
+        ScalaFrame vsplit 2
+        ScalaFrame(0) = Create hPanel ('menu_bar, 7) mit
+            a color GameCons.blue
+        ScalaFrame(1) = Create hPanel ('center_panel, 3) mit
+            a color GameCons.green
 
-	def change_color(actor: Shape) {
-		actor color GameCons.green
-	}
+        Create button 'new_game_button mit
+            a buttonText "New Game"
+        'menu_bar(0) = 'new_game_button
+        'menu_bar(1) = Create button 'options_button buttonText "Options"
+        'menu_bar(2) = Create button 'help_button buttonText "Help"
 
-	def move_left(actor: Shape) {
-		actor velocity (GameCons.west, 10)
-	}
+        'center_panel(0) = 'e1
+        'center_panel(1) = 'e2
+        'center_panel(2) = Create vPanel ('side_panel, 5) mit
+            a color GameCons.red
 
-	def move_right(actor: Shape) {
-		actor velocity (GameCons.east, 10)
-	}
+        'side_panel(0) = Create label 'high_scores_label
 
-	def stop_moving(actor: Shape) {
-		actor velocity (0, 0)
-	}
+        Create label 'credits_label mit
+            a labelText "Copyright your mom"
+        'side_panel(1) = 'credits_label
+        'side_panel(2) = Create label 'left_score mit
+            a labelText "Left player score: " + left_score
+        'side_panel(3) = Create label 'right_score mit
+            a labelText "Right player score: " + right_score
+
+        Run
+    }
+
+    def destroyAndBouncePlayerLeft(actor: Shape, actee: Shape) {
+        destroy(actor, actee)
+        bounce(actor, actee)
+        left_score += 1
+        'left_score labelText "Left player score: " + left_score
+    }
+
+    def destroyAndBouncePlayerRight(actor: Shape, actee: Shape) {
+        destroy(actor, actee)
+        bounce(actor, actee)
+        right_score += 1
+        'right_score labelText "Right player score: " + right_score
+    }
+
+    def bounce(actor: Shape, actee: Shape) {
+        println(actor + " bounces " + actee)
+    }
+
+    def destroy(actor: Shape, actee: Shape) {
+        println(actor + " destroys " + actee)
+        actee visible false
+    }
+
+    def change_color(actor: Shape) {
+        actor color GameCons.green
+    }
+
+    def move_left(actor: Shape) {
+        actor velocity (GameCons.west, 10)
+    }
+
+    def move_right(actor: Shape) {
+        actor velocity (GameCons.east, 10)
+    }
+
+    def stop_moving(actor: Shape) {
+        actor velocity (0, 0)
+    }
 }

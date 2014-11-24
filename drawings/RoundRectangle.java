@@ -5,7 +5,7 @@ import java.awt.geom.*;
 
 public class RoundRectangle extends AnimatingChild
 {
-    private double width, height, arcwidth, archeight;
+    private double width, height, arcWidth, arcHeight;
 
     public RoundRectangle()
     {
@@ -13,42 +13,35 @@ public class RoundRectangle extends AnimatingChild
         y = 10;
         width = 50;
         height = 50;
-		arcwidth = 15;
-		archeight = 15;
+        arcWidth = 15;
+        arcHeight = 15;
         color = Color.BLACK;
     }
 
-	public void setWidth(double width) {
-		this.width = width;
-	}
+    public void setSize(double width, double height) {
+        this.width = width;
+        this.height = height;
+    }
 
-	public double getWidth() {
-		return this.width;
-	}
+    public double getWidth() {
+        return width;
+    }
+    
+    public double getHeight() {
+        return height;
+    }
 
-	public void setHeight(double height) {
-		this.height = height;
-	}
-	
-	public double getHeight() {
-		return height;
-	}
+    public void setArcSize(double arcWidth, double arcHeight) {
+        this.arcWidth = arcWidth;
+    }
 
-	public void setArcWidth(double arcwidth) {
-		this.arcwidth = arcwidth;
-	}
-
-	public double getArcWidth() {
-		return this.arcwidth;
-	}
-
-	public void setArcHeight(double archeight) {
-		this.archeight = archeight;
-	}
-	
-	public double getArcHeight() {
-		return this.archeight;
-	}
+    public double getArcWidth() {
+        return arcWidth;
+    }
+    
+    public double getArcHeight() {
+        return arcHeight;
+    }
 
     public void animate()
     {   
@@ -60,15 +53,11 @@ public class RoundRectangle extends AnimatingChild
 
     public void draw(Graphics2D g2)
     {
-		if(visible) {
-	        RoundRectangle2D.Double rect = new RoundRectangle2D.Double(x, y, width, height, arcwidth, archeight);
-    	    g2.setColor(color);
-        	g2.fill(rect);
-		}
-    }
-
-    public boolean intersects(AnimatingChild ac) {
-        return ac.getBounds().intersects(x, y, width, height);
+        if (visible) {
+            RoundRectangle2D.Double rect = new RoundRectangle2D.Double(x, y, width, height, arcWidth, arcHeight);
+            g2.setColor(color);
+            g2.fill(rect);
+        }
     }
 
     protected Rectangle2D.Double getBounds() {
@@ -77,6 +66,7 @@ public class RoundRectangle extends AnimatingChild
 
     public String toString() {
         return "RoundRectangle(x=" + x + ", y=" + y +
-            ", w=" + width + ", h=" + height + ", arcw=" + arcwidth + ", arch=" + archeight + ")";
+            ", w=" + width + ", h=" + height +
+            ", arcw=" + arcWidth + ", arch=" + arcHeight + ")";
     }
 }

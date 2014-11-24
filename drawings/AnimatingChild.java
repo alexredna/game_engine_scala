@@ -11,12 +11,12 @@ import java.util.*;
  */
 abstract public class AnimatingChild
 {
-	protected double x, y;
-	protected Color color;
-    protected int direction = 0;
-    protected int speed = 0;
+    protected double x, y;
+    protected Color color;
+    protected double direction = 0;
+    protected double speed = 0;
     protected boolean active = false;
-	protected boolean visible = true;
+    protected boolean visible = true;
 
     /**
      * Animates the object by changing very small details, (such as size, position, or color), that affect the drawing of the object
@@ -32,8 +32,8 @@ abstract public class AnimatingChild
     abstract protected Rectangle2D.Double getBounds();
 
     public void setLocation(double x, double y) {
-    	this.x = x;
-    	this.y = y;
+        this.x = x;
+        this.y = y;
     }
 
     public Point2D.Double getLocation() {
@@ -41,35 +41,38 @@ abstract public class AnimatingChild
     }
 
     public void setColor(Color color) {
-    	this.color = color;
+        this.color = color;
     }
 
     public Color getColor() {
         return color;
     }
 
-    public void setVelocity(int direction, int speed) {
+    public void setVelocity(double direction, double speed) {
         this.direction = direction;
         this.speed = speed;
     }
 
-    public int getDirection() {
+    public double getDirection() {
         return direction;
     }
 
-    public int getSpeed() {
+    public double getSpeed() {
         return speed;
     }
 
     public void setActive(boolean active) {
         this.active = active;
     }
-	
-	public void setVisible(boolean visible) {
-		this.visible = visible;
-	}
+    
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
 
     public boolean intersects(AnimatingChild other) {
+        if (!visible || !other.visible)
+            return false;
+
         Rectangle2D.Double t = getBounds();
         Rectangle2D.Double o = other.getBounds();
 
