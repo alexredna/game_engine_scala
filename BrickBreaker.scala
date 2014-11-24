@@ -33,12 +33,14 @@ object BrickBreaker extends GameEnvironment
 
 		// define all environments
 
-		Create environment 'e1 und
+		Create environment 'e1 mit
+			a size (400, 600) und
 			an addShape 'c1 und
 			an addShape 'c2 und
 			an onKeyPress (KeyEvent.VK_SPACE, 'change_color, 'c2)
 
-		Create environment 'e2 und
+		Create environment 'e2 mit
+			a size (400, 600) und
 			an addShape 'r at (200, 200) und
 			an onKeyPress (KeyEvent.VK_LEFT, 'move_left, 'r) und
 			an onKeyPress (KeyEvent.VK_RIGHT, 'move_right, 'r)
@@ -46,11 +48,9 @@ object BrickBreaker extends GameEnvironment
 		// define the frame
 
 		ScalaFrame vsplit 2
-		ScalaFrame(0) = Create panel 'menu_bar mit
-							a hsplit 7 und
+		ScalaFrame(0) = Create vPanel ('menu_bar, 7) mit
 							a color GameCons.blue
-		ScalaFrame(1) = Create panel 'center_panel mit
-							a hsplit 3 und
+		ScalaFrame(1) = Create hPanel ('center_panel, 3) mit
 							a color GameCons.green
 
 		Create button 'new_game_button mit
@@ -59,8 +59,7 @@ object BrickBreaker extends GameEnvironment
 
 		'center_panel(0) = 'e1
 		'center_panel(1) = 'e2
-		'center_panel(2) = Create panel 'side_panel mit
-								a vsplit 5 und
+		'center_panel(2) = Create vPanel ('side_panel, 5) mit
 								a color GameCons.red
 
 		'side_panel(0) = Create label 'high_scores_label

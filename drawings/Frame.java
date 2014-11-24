@@ -14,10 +14,6 @@ public class Frame extends JFrame
     {
         super("MY PROGRAM");
 
-        /*content = new JPanel(new BorderLayout());
-        content.add(environmentPanel, BorderLayout.CENTER);
-        content.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        content.setOpaque(false);*/
     }
 
     public void run() {
@@ -26,9 +22,9 @@ public class Frame extends JFrame
         int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
         int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
         setLocation((screenWidth - 1024)/2 , (screenHeight - 600)/2);
-        setSize(new Dimension(1024, 600));
-        //setContentPane(content);
+        //setSize(new Dimension(1024, 600));
         //setExtendedState(JFrame.MAXIMIZED_BOTH);
+        pack();
         setVisible(true);
         setResizable(false);
     }

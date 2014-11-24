@@ -4,6 +4,7 @@ import drawings.AnimatingPanel
 import drawings.Frame
 import drawings.Rectangle
 import drawings.JavaAction
+import drawings.SplitPanel
 
 import scala.collection.mutable.Map
 import scala.language.implicitConversions
@@ -14,13 +15,12 @@ import javax.swing._
 class GameEnvironment {
 
 	val frame = new drawings.Frame()
-	frame.getContentPane().setBackground(GameCons.blue)
 
 	var shape_bindings = Map[Symbol, AnimatingChild]()
 	var environment_bindings = Map[Symbol, AnimatingPanel]()
 	var action_bindings = Map[Symbol, JavaAction]()
 
-	var panel_bindings = Map[Symbol, JPanel]()
+	var panel_bindings = Map[Symbol, SplitPanel]()
 	var button_bindings = Map[Symbol, JButton]()
 	var label_bindings = Map[Symbol, JLabel]()
 
@@ -62,11 +62,18 @@ class GameEnvironment {
 			Shape(s)
 		}
 
-		def panel(s: Symbol): ScalaPanel = {
+		def hPanel(s: Symbol, n: Int): ScalaPanel = {
 			if (isBound(s))
 				sys.error("Variable " + s + " is already bound.")
-			val p = new JPanel()
-			p.setOpaque(false)
+			val p = new SplitPanel(n, true)
+			panel_bindings += (s -> p)
+			ScalaPanel(s)
+		}
+
+		def vPanel(s: Symbol, n: Int): ScalaPanel = {
+			if (isBound(s))
+				sys.error("Variable " + s + " is already bound.")
+			val p = new SplitPanel(n, false)
 			panel_bindings += (s -> p)
 			ScalaPanel(s)
 		}
@@ -75,6 +82,7 @@ class GameEnvironment {
 			if (isBound(s))
 				sys.error("Variable " + s + " is already bound.")
 			val b = new JButton()
+			b.setFocusable(false)
 			button_bindings += (s -> b)
 			ScalaButton(s)
 		}
@@ -104,6 +112,11 @@ class GameEnvironment {
 				sys.error("BAD")
 			lastAdded.location(pos._1, pos._2)
 			lastAdded = null
+			this
+		}
+
+		def size(width: Int, height: Int): Environment = {
+			fetch().setPreferredSize(new Dimension(width, height))
 			this
 		}
 
@@ -168,16 +181,20 @@ class GameEnvironment {
 	}
 
 	object ScalaFrame {
-		var horizontal: Boolean = false
+		var tooLateToSplit: Boolean = false
 		def hsplit(n: Int) = {
-			frame.getContentPane().setLayout(new GridLayout(1, n, 5, 5))
-			horizontal = true
+			if (tooLateToSplit)
+				sys.error("Already called split on frame")
+			tooLateToSplit = true
+			frame.setContentPane(new SplitPanel(n, true));
 			this
 		}
 
 		def vsplit(n: Int) = {
-			frame.getContentPane().setLayout(new GridLayout(n, 1, 5, 5))
-			horizontal = false
+			if (tooLateToSplit)
+				sys.error("Already called split on frame")
+			tooLateToSplit = true
+			frame.setContentPane(new SplitPanel(n, false));
 			this
 		}
 
@@ -186,26 +203,19 @@ class GameEnvironment {
 			this
 		}
 
-		/*def addComponent(comp: ScalaComponent): ScalaFrame = {
-
-
-			this
-		}*/
-
 		def update(index: Int, comp: ScalaComponent) {
-			if (!frame.getContentPane().getLayout().isInstanceOf[GridLayout])
-				sys.error("Attempted to add at invalid index")
-			val layout: GridLayout = frame.getContentPane().getLayout().asInstanceOf[GridLayout]
-			if (horizontal)
-				if (layout.getColumns() < index)
-					sys.error("Attempted to add at invalid index")
-			else
-				if (layout.getRows() < index)
-					sys.error("Attempted to add at invalid index")
-			frame.getContentPane().add(comp.fetch(), index)
+			if (!tooLateToSplit) {
+				frame.setContentPane(new SplitPanel(1, true));
+				tooLateToSplit = true
+			}
+			frame.getContentPane().asInstanceOf[SplitPanel].setChild(index, comp.fetch())
 		}
 
 		def update(index: Int, compSymbol: Symbol) {
+			if (!tooLateToSplit) {
+				frame.setContentPane(new SplitPanel(1, true));
+				tooLateToSplit = true
+			}
 			if (!isBound(compSymbol))
 				sys.error("Cannot find " + compSymbol)
 			var comp: JComponent = null
@@ -220,17 +230,7 @@ class GameEnvironment {
 			if (comp == null)
 				sys.error("Cannot find " + compSymbol)
 
-			val content: Container = frame.getContentPane()
-			if (!content.getLayout().isInstanceOf[GridLayout])
-				sys.error("Attempted to add at invalid index")
-			val layout: GridLayout = content.getLayout().asInstanceOf[GridLayout]
-			if (horizontal)
-				if (layout.getColumns() < index)
-					sys.error("Attempted to add at invalid index")
-			else
-				if (layout.getRows() < index)
-					sys.error("Attempted to add at invalid index")
-			content.add(comp, index)
+			frame.getContentPane().asInstanceOf[SplitPanel].setChild(index, comp)
 		}
 	}
 
@@ -238,43 +238,15 @@ class GameEnvironment {
 		def fetch(): JComponent
 	}
 	case class ScalaPanel(s: Symbol) extends ScalaComponent {
-		var horizontal: Boolean = false
-		override def fetch(): JPanel = panel_bindings.get(s).get
-
-		def hsplit(n: Int): ScalaPanel = {
-			fetch().setLayout(new GridLayout(1, n, 5, 5))
-			horizontal = true
-			this
-		}
-
-		def vsplit(n: Int): ScalaPanel = {
-			fetch().setLayout(new GridLayout(n, 1, 5, 5))
-			horizontal = false
-			this
-		}
+		override def fetch(): SplitPanel = panel_bindings.get(s).get
 
 		def color(color: Color): ScalaPanel = {
 			fetch().setBackground(color)
 			this
 		}
 
-		/*def addComponent(comp: ScalaComponent): ScalaPanel = {
-
-
-			this
-		}*/
-
 		def update(index: Int, comp: ScalaComponent) {
-			if (!fetch().getLayout().isInstanceOf[GridLayout])
-				sys.error("Attempted to add at invalid index")
-			val layout: GridLayout = fetch().getLayout().asInstanceOf[GridLayout]
-			if (horizontal)
-				if (layout.getColumns() < index)
-					sys.error("Attempted to add at invalid index")
-			else
-				if (layout.getRows() < index) 
-					sys.error("Attempted to add at invalid index")
-			fetch().add(comp.fetch(), index)
+			fetch().setChild(index, comp.fetch())
 		}
 
 		def update(index: Int, compSymbol: Symbol) {
@@ -292,16 +264,7 @@ class GameEnvironment {
 			if (comp == null)
 				sys.error("Cannot find " + compSymbol)
 
-			if (!fetch().getLayout().isInstanceOf[GridLayout])
-				sys.error("Attempted to add at invalid index")
-			val layout: GridLayout = fetch().getLayout().asInstanceOf[GridLayout]
-			if (horizontal)
-				if (layout.getColumns() < index)
-					sys.error("Attempted to add at invalid index")
-			else
-				if (layout.getRows() < index)
-					sys.error("Attempted to add at invalid index")
-			fetch().add(comp, index)
+			fetch().setChild(index, comp)
 		}
 
 		def mit(t: Article): ScalaPanel = this
