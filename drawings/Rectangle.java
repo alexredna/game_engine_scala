@@ -3,12 +3,6 @@ package drawings;
 import java.awt.*;
 import java.awt.geom.*;
 
-/**
- * RedResizingRectangle is an AnimatingChild extension visually represented by a red rectangle
- * It changes its width and height by one pixel every time its animate method is called
- * 
- * @author Nick Walther
- */
 public class Rectangle extends AnimatingChild
 {
     private double width, height;

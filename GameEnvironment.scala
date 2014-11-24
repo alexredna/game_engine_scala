@@ -12,17 +12,18 @@ import scala.runtime._
 
 import java.awt.event._
 import java.awt._
+import java.beans._
 import javax.swing._
 
-
-class GameEnvironment extends KeyListener {
+class GameEnvironment extends KeyListener with PropertyChangeListener {
 	val frame = new drawings.Frame()
+	frame.addKeyListener(this)
+	frame.addPropertyChangeListener(this)
+
 	var shape_bindings = Map[Symbol, AnimatingChild]()
 	var environment_bindings = Map[Symbol, AnimatingPanel]()
 	var action_bindings = Map[Symbol, JavaAction]()
 	var key_bindings = Map[Int, Map[AnimatingChild, JavaAction]]()
-
-	frame.addKeyListener(this)
 
 	var panel_bindings = Map[Symbol, SplitPanel]()
 	var button_bindings = Map[Symbol, JButton]()
@@ -142,7 +143,6 @@ class GameEnvironment extends KeyListener {
 
 	case class Shape(s: Symbol) {
 		var interaction_bindings = Map[Shape, Set[Shape => Unit]]()
-		fetch().setCallback(callback)
 
 		def fetch(): AnimatingChild = shape_bindings.get(s).get
 
@@ -163,22 +163,15 @@ class GameEnvironment extends KeyListener {
 			this
 		}
 
-		def interaction(inter: (Shape, Shape => Unit)) = {
-			val (s, b) = inter
-
+		def interaction(s: Shape, func: Shape => Unit) = {
 			if (!interaction_bindings.contains(s)) {
-				val behaviors = Set(b)
+				val behaviors = Set(func)
 				interaction_bindings += (s -> behaviors)
 			} else {
 				val behaviors = interaction_bindings.get(s).get
-				interaction_bindings += (s -> (behaviors + b))
+				interaction_bindings += (s -> (behaviors + func))
 			}
 			this
-		}
-
-		def callback(other: AnimatingChild) = {
-			println("AHOY")
-			true
 		}
 
 		def mit(t: Article): Shape = this
@@ -210,11 +203,6 @@ class GameEnvironment extends KeyListener {
 		}
 		override def toString(): String = "Action " + s
 	}
-
-	def bounces(s: Shape) {
-		s.fetch().setVelocity(0, 0)
-	}
-	def destroys(s: Shape) { }
 
 	object ScalaFrame {
 		var tooLateToSplit: Boolean = false
@@ -370,6 +358,13 @@ class GameEnvironment extends KeyListener {
 			println("Unbound variable")
 	}
 
+	implicit def symbol2Shape(s: Symbol) = Shape(s)
+	implicit def symbol2Environment(s: Symbol) = Environment(s)
+	implicit def symbol2Action(s: Symbol) = Action(s)
+	implicit def symbol2Panel(s: Symbol) = ScalaPanel(s)
+	implicit def symbol2Button(s: Symbol) = ScalaButton(s)
+	implicit def symbol2Label(s: Symbol) = ScalaLabel(s)
+
 	def keyPressed(e: KeyEvent) {
 		var key: Int = e.getKeyCode()
 		if (key_bindings.contains(key)) {
@@ -388,12 +383,7 @@ class GameEnvironment extends KeyListener {
 
 	def keyTyped(e: KeyEvent) { }
 
-	def ActionPerformed(a: ActionEvent) { }
-
-	implicit def symbol2Shape(s: Symbol) = Shape(s)
-	implicit def symbol2Environment(s: Symbol) = Environment(s)
-	implicit def symbol2Action(s: Symbol) = Action(s)
-	implicit def symbol2Panel(s: Symbol) = ScalaPanel(s)
-	implicit def symbol2Button(s: Symbol) = ScalaButton(s)
-	implicit def symbol2Label(s: Symbol) = ScalaLabel(s)
+	def propertyChange(event: PropertyChangeEvent) {
+		println("YAY!!!!!")
+	}
 }
