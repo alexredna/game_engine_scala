@@ -17,7 +17,7 @@ import java.beans._
 import javax.swing._
 
 class JazzFramework extends KeyListener with PropertyChangeListener {
-  private val frame = new drawings.Frame()
+  private val frame = new drawings.Frame("My Program")
   frame.addKeyListener(this)
   frame.addPropertyChangeListener(this)
 
@@ -483,12 +483,8 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
   }
 
   def Run() {
-
     frame.getContentPane().asInstanceOf[SplitPanel].initLayout()
-
-
     frame.run()
-
     frame.getContentPane().asInstanceOf[SplitPanel].startAnimation()
   }
 
