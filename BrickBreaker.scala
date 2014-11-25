@@ -7,23 +7,23 @@ object BrickBreaker extends JazzFramework
 {
   var left_score: Int = 0
   var right_score: Int = 0
+  var is_paused: Boolean = false
 
   def main(args: Array[String])
   {
     // define all shapes
-
     Create circle 'c1 having
       a location (188, 500) and
       a radius 25 and
       a color GameCons.blue and
-      a velocity (GameCons.north, 5) and
+      a velocity (GameCons.north, GameCons.medium) and
       an active true
 
     Create circle 'c2 having
       a location (188, 500) and
       a radius 25 and
       a color GameCons.cyan and
-      a velocity (75, 5) and
+      a velocity (75, GameCons.medium) and
       an active true
 
     Create rectangle 'p1 having
@@ -81,7 +81,7 @@ object BrickBreaker extends JazzFramework
     // define all environments
 
     Create environment 'e1 having
-    a size (400, 600) and
+      a size (400, 600) and
       an onKeyPress   (KeyEvent.VK_A, move_left _, 'p1) and
       an onKeyRelease (KeyEvent.VK_A, stop_moving _, 'p1) and
       an onKeyPress   (KeyEvent.VK_D, move_right _, 'p1) and
@@ -93,7 +93,7 @@ object BrickBreaker extends JazzFramework
       an add 'wt1
 
     Create environment 'e2 having
-    a size (400, 600) and
+      a size (400, 600) and
       an onKeyPress   (KeyEvent.VK_LEFT, move_left _, 'p2) and
       an onKeyRelease (KeyEvent.VK_LEFT, stop_moving _, 'p2) and
       an onKeyPress   (KeyEvent.VK_RIGHT, move_right _, 'p2) and
@@ -140,32 +140,32 @@ object BrickBreaker extends JazzFramework
 
     // define the frame
 
-    ScalaFrame vsplit 2
-    ScalaFrame(0) = Create hPanel ('menu_bar, 7) having
-      a color GameCons.blue
-    ScalaFrame(1) = Create hPanel ('center_panel, 3) having
-      a color GameCons.green
+    ScalaFrame vertical split
+    ScalaFrame add (Create hPanel 'menu_bar having
+      a color GameCons.blue)
+    ScalaFrame add (Create hPanel 'center_panel having
+      a color GameCons.green)
 
-    Create button 'new_game_button having
-      a text "New Game"
-    'menu_bar(0) = 'new_game_button
-    'menu_bar(1) = Create button 'options_button text "Options"
-    'menu_bar(2) = Create button 'help_button text "Help"
+    Create button 'pause_button having
+      a text "Pause" and
+      an onClick pause
+    'menu_bar add 'pause_button
+    'menu_bar add (Create button 'options_button text "Options")
+    'menu_bar add (Create button 'help_button text "Help")
 
-    'center_panel(0) = 'e1
-    'center_panel(1) = 'e2
-    'center_panel(2) = Create vPanel ('side_panel, 5) having
-      a color GameCons.red
+    'center_panel add 'e1
+    'center_panel add 'e2
+    'center_panel add (Create vPanel 'side_panel color GameCons.red)
 
-    'side_panel(0) = Create label 'high_scores_label
+    'side_panel add (Create label 'high_scores_label)
 
     Create label 'credits_label having
       a text "Copyright your mom"
-    'side_panel(1) = 'credits_label
-    'side_panel(2) = Create label 'left_score having
-      a text "Left player score: " + left_score
-    'side_panel(3) = Create label 'right_score having
-      a text "Right player score: " + right_score
+    'side_panel add 'credits_label
+    'side_panel add (Create label 'left_score having
+      a text "Left player score: " + left_score)
+    'side_panel add (Create label 'right_score having
+      a text "Right player score: " + right_score)
 
     Run
   }
@@ -282,5 +282,20 @@ object BrickBreaker extends JazzFramework
 
   def stop_moving(actor: Shape) {
     actor velocity (0, 0)
+  }
+
+  def pause() {
+    val (directionC1: Double, oldVelocityC1: Double) = 'c1 velocity;
+    val (directionC2: Double, oldVelocityC2: Double) = 'c2 velocity;
+    if (is_paused) {
+      'c1 velocity (directionC1, GameCons.medium)
+      'c2 velocity (directionC2, GameCons.medium)
+      'pause_button text "Pause"
+    } else {
+      'c1 velocity (directionC1, 0)
+      'c2 velocity (directionC2, 0)
+      'pause_button text "UnPause"
+    }
+    is_paused = !is_paused
   }
 }

@@ -17,7 +17,7 @@ import java.beans._
 import javax.swing._
 
 class JazzFramework extends KeyListener with PropertyChangeListener {
-  private val frame = new drawings.Frame()
+  private val frame = new drawings.Frame("My Program")
   frame.addKeyListener(this)
   frame.addPropertyChangeListener(this)
 
@@ -30,6 +30,8 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
 
   private var panel_bindings = Map[Symbol, SplitPanel]()
   private var button_bindings = Map[Symbol, JButton]()
+  private var button_press_bindings = Map[JButton, () => Unit]()
+
   private var label_bindings = Map[Symbol, JLabel]()
 
   private def isBound(s: Symbol): Boolean =
@@ -79,16 +81,16 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       Shape(s)
     }
 
-    def hPanel(s: Symbol, n: Int): ScalaPanel = {
+    def hPanel(s: Symbol): ScalaPanel = {
       assertNotBound(s)
-      val p = new SplitPanel(n, true)
+      val p = new SplitPanel(true)
       panel_bindings += (s -> p)
       ScalaPanel(s)
     }
 
-    def vPanel(s: Symbol, n: Int): ScalaPanel = {
+    def vPanel(s: Symbol): ScalaPanel = {
       assertNotBound(s)
-      val p = new SplitPanel(n, false)
+      val p = new SplitPanel(false)
       panel_bindings += (s -> p)
       ScalaPanel(s)
     }
@@ -96,6 +98,14 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
     def button(s: Symbol): ScalaButton = {
       assertNotBound(s)
       val b = new JButton()
+      b.addActionListener(new ActionListener() {
+          def actionPerformed(e: ActionEvent) {
+            if (button_press_bindings.contains(b)) {
+              val func: () => Unit = button_press_bindings.get(b).get
+              func()
+            }
+          }
+        });
       b.setFocusable(false)
       button_bindings += (s -> b)
       ScalaButton(s)
@@ -129,10 +139,25 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       case default => methodError("active"); this
     }
 
-    def add(s: Symbol): JazzElement = { assertShape(s); add(Shape(s)) }
-    def add(s: Shape): JazzElement = this match {
-      case j: Environment => j._add(s)
-      case default => methodError("addShape"); this
+    def add(s: Symbol): JazzElement = {
+      if (environment_bindings.contains(s))
+        add(Environment(s))
+      else if (shape_bindings.contains(s))
+        add(Shape(s))
+      else if (panel_bindings.contains(s))
+        add(ScalaPanel(s))
+      else if (button_bindings.contains(s))
+        add(ScalaButton(s))
+      else if (label_bindings.contains(s))
+        add(ScalaLabel(s))
+      else
+        sys.error(s + " is not a valid symbol")
+      this
+    }
+    def add(e: JazzElement): JazzElement = this match {
+      case j: Environment => j._add(e)
+      case j: ScalaPanel => j._add(e)
+      case default => methodError("add"); this
     }
 
     def arcSize(width: Double, height: Double): JazzElement = this match {
@@ -172,6 +197,11 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       case default => methodError("location"); (0, 0)
     }
 
+    def onClick(func: () => Unit): JazzElement = this match {
+      case j: ScalaButton => j._onClick(func)
+      case default => methodError("onClick"); this
+    }
+
     def onKeyPress(key: Int, action: Shape => Unit, s: Symbol): JazzElement =
     { assertShape(s); onKeyPress(key, action, Shape(s)) }
     def onKeyPress(key: Int, action: Shape => Unit, child: Shape): JazzElement = this match {
@@ -197,24 +227,11 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       case default => methodError("size"); this
     }
 
-    def update(index: Int, comp: JazzElement) {
-      if (panel_bindings.contains(comp.getSymbol()))
-        update(index, comp.asInstanceOf[ScalaPanel])
-      else if (button_bindings.contains(comp.getSymbol()))
-        update(index, comp.asInstanceOf[ScalaButton])
-      else if (label_bindings.contains(comp.getSymbol()))
-        update(index, comp.asInstanceOf[ScalaLabel])
-      else
-        methodError("update/()")
+    def text(str: String): JazzElement = this match {
+      case j: ScalaButton => j._text(str)
+      case j: ScalaLabel => j._text(str)
+      case default => methodError("text"); this
     }
-    def update(index: Int, comp: ScalaComponent) {this match {
-      case j: ScalaPanel => j._update(index, comp)
-      case default => methodError("update")
-    }}
-    def update(index: Int, compSymbol: Symbol) {this match {
-      case j: ScalaPanel => j._update(index, compSymbol)
-      case default => methodError("update")
-    }}
 
     def velocity(direction: Double, speed: Double): JazzElement = this match {
       case j: Shape => j._velocity(direction, speed)
@@ -230,12 +247,6 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       case default => methodError("visible"); this
     }
 
-    def text(str: String): JazzElement = this match {
-      case j: ScalaButton => j._text(str)
-      case j: ScalaLabel => j._text(str)
-      case default => methodError("text"); this
-    }
-
     def has(t: Article): JazzElement = this
     def having(t: Article): JazzElement = this
     def and(t: Article): JazzElement = this
@@ -244,13 +255,17 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
   }
 
   case class Environment(s: Symbol) extends JazzElement(s) {
-    private def fetch(): AnimatingPanel = environment_bindings.get(s).get
+    def fetch(): AnimatingPanel = environment_bindings.get(s).get
 
     var lastAdded: Shape = null
 
-    def _add(s: Shape): Environment = {
-      fetch().addChild(s.fetch())
-      lastAdded = s
+    def _add(e: JazzElement): Environment = {
+      e match {
+        case s: Shape =>
+          fetch().addChild(s.fetch())
+          lastAdded = s
+        case default => sys.error("Cannot add " + e + " to environment: it is not a shape")
+      }
       this
     }
 
@@ -379,19 +394,19 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
 
   object ScalaFrame {
     private var tooLateToSplit: Boolean = false
-    def hsplit(n: Int) = {
+    def horizontal(s: Split) = {
       if (tooLateToSplit)
         sys.error("Already called split on frame")
       tooLateToSplit = true
-      frame.setContentPane(new SplitPanel(n, true));
+      frame.setContentPane(new SplitPanel(true));
       this
     }
 
-    def vsplit(n: Int) = {
+    def vertical(s: Split) = {
       if (tooLateToSplit)
         sys.error("Already called split on frame")
       tooLateToSplit = true
-      frame.setContentPane(new SplitPanel(n, false));
+      frame.setContentPane(new SplitPanel(false));
       this
     }
 
@@ -400,44 +415,15 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       this
     }
 
-    def update(index: Int, comp: JazzElement) {
-      if (panel_bindings.contains(comp.getSymbol()))
-        update(index, comp.asInstanceOf[ScalaPanel])
-      else if (button_bindings.contains(comp.getSymbol()))
-        update(index, comp.asInstanceOf[ScalaButton])
-      else if (label_bindings.contains(comp.getSymbol()))
-        update(index, comp.asInstanceOf[ScalaLabel])
-      else
-        sys.error("Cannot add this component to the frame")
-    }
-    def update(index: Int, comp: ScalaComponent) {
-      if (!tooLateToSplit) {
-        frame.setContentPane(new SplitPanel(1, true));
-        tooLateToSplit = true
+    def add(either: JazzElement) = {
+      either match {
+        case e: Environment =>
+          frame.getContentPane().asInstanceOf[SplitPanel].addChild(e.fetch())
+        case s: ScalaComponent =>
+          frame.getContentPane().asInstanceOf[SplitPanel].addChild(s.fetch())
+        case default => sys.error("Cannot add " + either + " to frame.")
       }
-      frame.getContentPane().asInstanceOf[SplitPanel].setChild(index, comp.fetch())
-    }
-
-    def update(index: Int, compSymbol: Symbol) {
-      if (!tooLateToSplit) {
-        frame.setContentPane(new SplitPanel(1, true));
-        tooLateToSplit = true
-      }
-      if (!isBound(compSymbol))
-        sys.error("Cannot find " + compSymbol)
-      var comp: JComponent = null
-      if (environment_bindings.contains(compSymbol))
-        comp = environment_bindings.get(compSymbol).get
-      if (panel_bindings.contains(compSymbol))
-        comp = panel_bindings.get(compSymbol).get
-      if (button_bindings.contains(compSymbol))
-        comp = button_bindings.get(compSymbol).get
-      if (label_bindings.contains(compSymbol))
-        comp = label_bindings.get(compSymbol).get
-      if (comp == null)
-        sys.error("Cannot find " + compSymbol)
-
-      frame.getContentPane().asInstanceOf[SplitPanel].setChild(index, comp)
+      this
     }
   }
 
@@ -452,26 +438,15 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       this
     }
 
-    def _update(index: Int, comp: ScalaComponent) {
-      fetch().setChild(index, comp.fetch())
-    }
-
-    def _update(index: Int, compSymbol: Symbol) {
-      if (!isBound(compSymbol))
-        sys.error("Cannot find " + compSymbol)
-      var comp: JComponent = null
-      if (environment_bindings.contains(compSymbol))
-        comp = environment_bindings.get(compSymbol).get
-      if (panel_bindings.contains(compSymbol))
-        comp = panel_bindings.get(compSymbol).get
-      if (button_bindings.contains(compSymbol))
-        comp = button_bindings.get(compSymbol).get
-      if (label_bindings.contains(compSymbol))
-        comp = label_bindings.get(compSymbol).get
-      if (comp == null)
-        sys.error("Cannot find " + compSymbol)
-
-      fetch().setChild(index, comp)
+    def _add(either: JazzElement): ScalaPanel = {
+      either match {
+        case e: Environment =>
+          fetch().asInstanceOf[SplitPanel].addChild(e.fetch())
+        case s: ScalaComponent =>
+          fetch().asInstanceOf[SplitPanel].addChild(s.fetch())
+        case default => sys.error("Cannot add " + either + " to panel.")
+      }
+      this
     }
 
     def _toString(): String = "ScalaPanel()"
@@ -479,6 +454,14 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
 
   case class ScalaButton(s: Symbol) extends ScalaComponent(s) {
     override def fetch(): JButton = button_bindings.get(s).get
+
+    def _onClick(func: () => Unit): ScalaButton = {
+      var button: JButton = fetch()
+      if (button_press_bindings.contains(button))
+        sys.error("onClick already called on " + s)
+      button_press_bindings += (button -> func)
+      this
+    }
 
     def _text(str: String): ScalaButton = {
       fetch().setText(str)
@@ -500,17 +483,16 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
   }
 
   def Run() {
+    frame.getContentPane().asInstanceOf[SplitPanel].initLayout()
     frame.run()
-
-    environment_bindings.foreach {
-      case (symbol, ap) =>
-        ap.startAnimation()
-    }
+    frame.getContentPane().asInstanceOf[SplitPanel].startAnimation()
   }
 
   class Article
   val a = new Article()
   val an = new Article()
+  class Split
+  val split = new Split()
 
   // need to add for all classes/objectsScala
   def about(s: Symbol) {

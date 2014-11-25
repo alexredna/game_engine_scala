@@ -1,48 +1,59 @@
 package drawings;
 
 import java.awt.*;
+import java.util.*;
 import javax.swing.*;
 
 public class SplitPanel extends JPanel {
-	private JPanel[] children;
-	private boolean[] initialized;
+	private ArrayList<JComponent> children;
 
-	public SplitPanel(int numChildren, boolean isHorizontal) {
-		GroupLayout layout = new GroupLayout(this);
-		setLayout(layout);
+	private GroupLayout layout;
+	private GroupLayout.Group hGroup, vGroup;
+
+	public SplitPanel(boolean isHorizontal) {
+		layout = new GroupLayout(this);
 		//layout.setAutoCreateGaps(true);
 		//layout.setAutoCreateContainerGaps(true);
 
-		children = new JPanel[numChildren];
-		initialized = new boolean[numChildren];
+		children = new ArrayList<JComponent>();
 
-		GroupLayout.Group hGroup = layout.createSequentialGroup();
-		GroupLayout.Group vGroup = layout.createParallelGroup();
+		hGroup = layout.createSequentialGroup();
+		vGroup = layout.createParallelGroup();
 
 		if (!isHorizontal) {
 			hGroup = layout.createParallelGroup();
 			vGroup = layout.createSequentialGroup();
 		}
 
-		for (int i = 0; i < numChildren; ++i) {
-			JPanel dummy = new JPanel();
-			hGroup.addComponent(dummy);
-			vGroup.addComponent(dummy);
-			add(dummy);
-			children[i] = dummy;
-		}
-		layout.setHorizontalGroup(hGroup);
-		layout.setVerticalGroup(vGroup);
-
 		setOpaque(false);
 	}
 
-	public void setChild(int index, JComponent comp) {
-		if (index < 0 || index > children.length)
-			throw new IllegalArgumentException("Invalid index to HPanel");
-		if (initialized[index])
-			throw new IllegalArgumentException("Index already initialized");
-		children[index].add(comp);
-		initialized[index] = true;
+	public void addChild(JComponent comp) {
+		JPanel dummy = new JPanel();
+		dummy.add(comp);
+		hGroup.addComponent(dummy);
+		vGroup.addComponent(dummy);
+		add(dummy);
+		children.add(comp);
+	}
+
+	public void initLayout() {
+		for (JComponent comp : children) {
+			if (comp instanceof SplitPanel)
+				((SplitPanel)comp).initLayout();
+		}
+
+		layout.setHorizontalGroup(hGroup);
+		layout.setVerticalGroup(vGroup);
+		setLayout(layout);
+	}
+
+	public void startAnimation() {
+		for (JComponent comp : children) {
+			if (comp instanceof SplitPanel)
+				((SplitPanel)comp).startAnimation();
+			else if (comp instanceof AnimatingPanel)
+				((AnimatingPanel)comp).startAnimation();
+		}
 	}
 }

@@ -10,9 +10,9 @@ import javax.swing.*;
  */
 public class Frame extends JFrame
 {
-    public Frame()
+    public Frame(String name)
     {
-        super("MY PROGRAM");
+        super(name);
 
     }
 
@@ -27,14 +27,5 @@ public class Frame extends JFrame
         pack();
         setVisible(true);
         setResizable(false);
-    }
-
-    public static void main(String[] args)
-    {
-        SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    new Frame();
-                }
-            });
     }
 }
