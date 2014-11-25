@@ -47,4 +47,13 @@ public class SplitPanel extends JPanel {
 		layout.setVerticalGroup(vGroup);
 		setLayout(layout);
 	}
+
+	public void startAnimation() {
+		for (JComponent comp : children) {
+			if (comp instanceof SplitPanel)
+				((SplitPanel)comp).startAnimation();
+			else if (comp instanceof AnimatingPanel)
+				((AnimatingPanel)comp).startAnimation();
+		}
+	}
 }

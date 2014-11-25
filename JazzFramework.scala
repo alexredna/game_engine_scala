@@ -30,6 +30,8 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
 
   private var panel_bindings = Map[Symbol, SplitPanel]()
   private var button_bindings = Map[Symbol, JButton]()
+  private var button_press_bindings = Map[JButton, () => Unit]()
+
   private var label_bindings = Map[Symbol, JLabel]()
 
   private def isBound(s: Symbol): Boolean =
@@ -96,6 +98,14 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
     def button(s: Symbol): ScalaButton = {
       assertNotBound(s)
       val b = new JButton()
+      b.addActionListener(new ActionListener() {
+          def actionPerformed(e: ActionEvent) {
+            if (button_press_bindings.contains(b)) {
+              val func: () => Unit = button_press_bindings.get(b).get
+              func()
+            }
+          }
+        });
       b.setFocusable(false)
       button_bindings += (s -> b)
       ScalaButton(s)
@@ -185,6 +195,11 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
     def location(): (Double, Double) = this match {
       case j: Shape => j.g_location()
       case default => methodError("location"); (0, 0)
+    }
+
+    def onClick(func: () => Unit): JazzElement = this match {
+      case j: ScalaButton => j._onClick(func)
+      case default => methodError("onClick"); this
     }
 
     def onKeyPress(key: Int, action: Shape => Unit, s: Symbol): JazzElement =
@@ -440,6 +455,14 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
   case class ScalaButton(s: Symbol) extends ScalaComponent(s) {
     override def fetch(): JButton = button_bindings.get(s).get
 
+    def _onClick(func: () => Unit): ScalaButton = {
+      var button: JButton = fetch()
+      if (button_press_bindings.contains(button))
+        sys.error("onClick already called on " + s)
+      button_press_bindings += (button -> func)
+      this
+    }
+
     def _text(str: String): ScalaButton = {
       fetch().setText(str)
       this
@@ -466,10 +489,7 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
 
     frame.run()
 
-    environment_bindings.foreach {
-      case (symbol, ap) =>
-        ap.startAnimation()
-    }
+    frame.getContentPane().asInstanceOf[SplitPanel].startAnimation()
   }
 
   class Article

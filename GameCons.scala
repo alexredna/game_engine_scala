@@ -15,7 +15,7 @@ object GameCons {
   val burnt_orange = new Color(191, 87, 0)
 
   val fast = 50
-  val medium = 20
+  val medium = 10
   val slow = 2
 
   val east = 0

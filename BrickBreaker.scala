@@ -6,6 +6,7 @@ object BrickBreaker extends JazzFramework
 {
   var left_score: Int = 0
   var right_score: Int = 0
+  var is_paused: Boolean = false
 
   def main(args: Array[String])
   {
@@ -14,14 +15,14 @@ object BrickBreaker extends JazzFramework
       a location (188, 500) and
       a radius 25 and
       a color GameCons.blue and
-      a velocity (GameCons.north, 1) and
+      a velocity (GameCons.north, GameCons.medium) and
       an active true
 
     Create circle 'c2 having
       a location (188, 500) and
       a radius 25 and
       a color GameCons.cyan and
-      a velocity (75, 1) and
+      a velocity (75, GameCons.medium) and
       an active true
 
     Create rectangle 'p1 having
@@ -103,9 +104,10 @@ object BrickBreaker extends JazzFramework
     ScalaFrame add (Create hPanel 'center_panel having
       a color GameCons.green)
 
-    Create button 'new_game_button having
-      a text "New Game"
-    'menu_bar add 'new_game_button
+    Create button 'pause_button having
+      a text "Pause" and
+      an onClick pause
+    'menu_bar add 'pause_button
     'menu_bar add (Create button 'options_button text "Options")
     'menu_bar add (Create button 'help_button text "Help")
 
@@ -206,5 +208,20 @@ object BrickBreaker extends JazzFramework
 
   def stop_moving(actor: Shape) {
     actor velocity (0, 0)
+  }
+
+  def pause() {
+    val (directionC1: Double, oldVelocityC1: Double) = 'c1 velocity;
+    val (directionC2: Double, oldVelocityC2: Double) = 'c2 velocity;
+    if (is_paused) {
+      'c1 velocity (directionC1, GameCons.medium)
+      'c2 velocity (directionC2, GameCons.medium)
+      'pause_button text "Pause"
+    } else {
+      'c1 velocity (directionC1, 0)
+      'c2 velocity (directionC2, 0)
+      'pause_button text "UnPause"
+    }
+    is_paused = !is_paused
   }
 }
