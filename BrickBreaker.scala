@@ -10,7 +10,6 @@ object BrickBreaker extends JazzFramework
   def main(args: Array[String])
   {
     // define all shapes
-
     Create circle 'c1 having
       a location (188, 500) and
       a radius 25 and
