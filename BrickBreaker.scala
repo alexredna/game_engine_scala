@@ -1,6 +1,7 @@
 import java.awt.event.KeyEvent
 import java.awt.geom.Line2D
 import scala.language.postfixOps
+import math.Pi
 
 object BrickBreaker extends JazzFramework
 {
@@ -15,14 +16,14 @@ object BrickBreaker extends JazzFramework
       a location (188, 500) and
       a radius 25 and
       a color GameCons.blue and
-      a velocity (GameCons.north, 1) and
+      a velocity (GameCons.north, 5) and
       an active true
 
     Create circle 'c2 having
       a location (188, 500) and
       a radius 25 and
       a color GameCons.cyan and
-      a velocity (75, 1) and
+      a velocity (75, 5) and
       an active true
 
     Create rectangle 'p1 having
@@ -35,10 +36,47 @@ object BrickBreaker extends JazzFramework
       a size (80, 20) and
       an active true
 
+    Create rectangle 'wr1 having
+      a location (400, 0) and
+      a size (50, 600) and
+      an active true
+
+    Create rectangle 'wl1 having
+      a location (-50, 0) and
+      a size (50, 600) and
+      an active true
+
+    Create rectangle 'wt1 having
+      a location (0, -50) and
+      a size (400, 50) and
+      an active true
+
+    Create rectangle 'wr2 having
+      a location (400, 0) and
+      a size (50, 600) and
+      an active true
+
+    Create rectangle 'wl2 having
+      a location (-50, 0) and
+      a size (50, 600) and
+      an active true
+
+    Create rectangle 'wt2 having
+      a location (0, -50) and
+      a size (400, 50) and
+      an active true
+
     // interactions between already defined shapes
 
-    'c1 interaction ('p1, bounce _)
-    'c2 interaction ('p2, bounce _)
+    'c1 interaction ('p1, bounceWithDeflection _)
+    'c1 interaction ('wr1, bounce _)
+    'c1 interaction ('wl1, bounce _)
+    'c1 interaction ('wt1, bounce _)
+
+    'c2 interaction ('p2, bounceWithDeflection _)
+    'c2 interaction ('wr2, bounce _)
+    'c2 interaction ('wl2, bounce _)
+    'c2 interaction ('wt2, bounce _)
 
     // define all environments
 
@@ -47,14 +85,24 @@ object BrickBreaker extends JazzFramework
       an onKeyPress   (KeyEvent.VK_A, move_left _, 'p1) and
       an onKeyRelease (KeyEvent.VK_A, stop_moving _, 'p1) and
       an onKeyPress   (KeyEvent.VK_D, move_right _, 'p1) and
-      an onKeyRelease (KeyEvent.VK_D, stop_moving _, 'p1)
+      an onKeyRelease (KeyEvent.VK_D, stop_moving _, 'p1) and
+      an add 'c1 and
+      an add 'p1 and
+      an add 'wr1 and
+      an add 'wl1 and
+      an add 'wt1
 
     Create environment 'e2 having
     a size (400, 600) and
       an onKeyPress   (KeyEvent.VK_LEFT, move_left _, 'p2) and
       an onKeyRelease (KeyEvent.VK_LEFT, stop_moving _, 'p2) and
       an onKeyPress   (KeyEvent.VK_RIGHT, move_right _, 'p2) and
-      an onKeyRelease (KeyEvent.VK_RIGHT, stop_moving _, 'p2)
+      an onKeyRelease (KeyEvent.VK_RIGHT, stop_moving _, 'p2) and
+      an add 'c2 and
+      an add 'p2 and
+      an add 'wr2 and
+      an add 'wl2 and
+      an add 'wt2
 
     for (row <- 0 until 4) {
       for (col <- 0 until 10) {
@@ -89,12 +137,6 @@ object BrickBreaker extends JazzFramework
         'c2 interaction (rr, destroyAndBouncePlayerRight _)
       }
     }
-
-    'e1 add 'c1 and
-      an add 'p1
-
-    'e2 add 'c2 and
-      an add 'p2
 
     // define the frame
 
@@ -142,52 +184,84 @@ object BrickBreaker extends JazzFramework
     'right_score text "Right player score: " + right_score
   }
 
+  def bounceWithDeflection(actor: Shape, actee: Shape) {
+    bounce(actor, actee)
+    val (ax, ay, aw, ah) = actor.bounds
+    val (bx, by, bw, bh) = actee.bounds
+    val posA = ax + aw / 2.0
+    val posB = bx + bw / 2.0
+
+    val delta = posA - posB
+
+    val (ad: Double, av: Double) = actor.velocity
+    
+    if (ad < 180) {
+      val angle = ad - Math.toDegrees(delta / bw * Pi)
+      val angleMod = if (angle < 0) (360 + angle) % 360 else angle % 360
+      val a = Math.min(Math.max(angleMod, 15), 165)
+      actor velocity (a, av)
+    }
+  }
+
   def bounce(actor: Shape, actee: Shape) {
     //println(actor + " bounces " + actee)
-    val (ax: Double, ay: Double, aw: Double, ah: Double) = actor bounds;
-    val midax = ax + (aw - ax) / 2
-    val miday = ay + (ah - ay) / 2
-    val (ad: Double, av: Double) = actor velocity;
-    val vector: Line2D.Double = new Line2D.Double(
-      midax - 2 * av * Math.cos(Math.toRadians(ad)), // 200 arbitrary
-      miday - 2 * av * Math.sin(Math.toRadians(ad)),
-      midax + 2 * av * Math.cos(Math.toRadians(ad)),
-      miday + 2 * av * Math.sin(Math.toRadians(ad)))
-    val (bx: Double, by: Double, bw: Double, bh: Double) = actee bounds;
-    val leftSide   = new Line2D.Double(bx, by, bx, by + bh)
-    val bottomSide = new Line2D.Double(bx, by + bh, bx + bw, by + bh)
-    val rightSide  = new Line2D.Double(bx + bw, by + bh, bx + bw, by)
-    val topSide    = new Line2D.Double(bx + bw, by, bx, by)
+    val (ax, ay, aw, ah) = actor.bounds
+    val minA = (ax, ay)
+    val maxA = (ax + aw, ay + ah)
+    val (bx, by, bw, bh) = actee.bounds
+    val minB = (bx, by)
+    val maxB = (bx + bw, by + bh)
 
-    //println(ax + ", " + ay + ", " + aw + ", " + ah + ", " + ad + ", " + av)
-    //println(bx + ", " + by + ", " + bw + ", " + bh + ", " + bd + ", " + bv)
-    var newDirection: Double = 0;
-    if (ad % 90 == 0)
-      newDirection = ad + 180
-    else if (ad > 0 && ad < 90) {
-      if (vector.intersectsLine(leftSide))
-        newDirection = ad + 90
-      else if (vector.intersectsLine(bottomSide))
-        newDirection = ad + 270 // same as -90
-    } else if (ad > 90 && ad < 180) {
-      if (vector.intersectsLine(bottomSide))
-        newDirection = ad + 90
-      else if (vector.intersectsLine(rightSide))
-        newDirection = ad - 90
-    } else if (ad > 180 && ad < 270) {
-      if (vector.intersectsLine(rightSide))
-        newDirection = ad + 90
-      else if (vector.intersectsLine(topSide))
-        newDirection = ad - 90
-    } else if (ad > 270 && ad < 360) {
-      if (vector.intersectsLine(topSide))
-        newDirection = ad + 90
-      else if (vector.intersectsLine(leftSide))
-        newDirection = ad - 90
+    if (minA._1 > maxB._1 || maxA._1 < minB._1 || minA._2 > maxB._2 || maxA._2 < minB._2) {
+      // separating axis theorem says there's no collision here
+      return
     }
-    newDirection = newDirection % 360
-    println(ad + ", " + newDirection)
-    actor velocity (newDirection, av)
+
+    var projection = (0.0, 0.0)
+    var size = 0.0
+
+    if (minA._1 < maxB._1) {
+      val overlap =  maxB._1 - minA._1
+      if (size == 0.0 || overlap < size) {
+        projection = (overlap, 0.0)
+        size = overlap
+      }
+    }
+    if (maxA._1 > minB._1) {
+      val overlap =  maxA._1 - minB._1
+      if (size == 0.0 || overlap < size) {
+        projection = (-overlap, 0.0)
+        size = overlap
+      }
+    }
+    if (minA._2 < maxB._2) {
+      val overlap =  maxB._2 - minA._2
+      if (size == 0.0 || overlap < size) {
+        projection = (0.0, overlap)
+        size = overlap
+      }
+    }
+    if (maxA._2 > minB._2) {
+      val overlap =  maxA._2 - minB._2
+      if (size == 0.0 || overlap < size) {
+        projection = (0.0, -overlap)
+        size = overlap
+      }
+    }
+
+    val pos = actor.location
+    val newPos = (pos._1 + projection._1, pos._2 + projection._2)
+    actor location (newPos._1, newPos._2)
+
+    val (ad: Double, av: Double) = actor.velocity
+    val velocity = (av * Math.cos(Math.toRadians(ad)), av * Math.sin(Math.toRadians(ad)))
+    val newVelocity = if (Math.abs(projection._1) > Math.abs(projection._2)) (-velocity._1, velocity._2) else (velocity._1, -velocity._2)
+
+    val newDir = Math.toDegrees(Math.atan2(newVelocity._2, newVelocity._1))
+    val newSpeed = Math.hypot(newVelocity._1, newVelocity._2)
+
+    val newDirection = if (newDir < 0) (360 + newDir) % 360 else newDir % 360
+    actor velocity (newDirection, newSpeed)
   }
 
   def destroy(actor: Shape, actee: Shape) {
