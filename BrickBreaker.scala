@@ -11,28 +11,28 @@ object BrickBreaker extends JazzFramework
   {
     // define all shapes
 
-    Create circle 'c1 mit
-      a location (188, 500) und
-      a radius 25 und
-      a color GameCons.blue und
-      a velocity (GameCons.north, 1) und
+    Create circle 'c1 having
+      a location (188, 500) and
+      a radius 25 and
+      a color GameCons.blue and
+      a velocity (GameCons.north, 1) and
       an active true
 
-    Create circle 'c2 mit
-      a location (188, 500) und
-      a radius 25 und
-      a color GameCons.cyan und
-      a velocity (75, 1) und
+    Create circle 'c2 having
+      a location (188, 500) and
+      a radius 25 and
+      a color GameCons.cyan and
+      a velocity (75, 1) and
       an active true
 
-    Create rectangle 'p1 mit
-      a location (160, 550) und
-      a size (80, 20) und
+    Create rectangle 'p1 having
+      a location (160, 550) and
+      a size (80, 20) and
       an active true
 
-    Create rectangle 'p2 mit
-      a location (160, 550) und
-      a size (80, 20) und
+    Create rectangle 'p2 having
+      a location (160, 550) and
+      a size (80, 20) and
       an active true
 
     // interactions between already defined shapes
@@ -42,25 +42,25 @@ object BrickBreaker extends JazzFramework
 
     // define all environments
 
-    Create environment 'e1 mit
-    a size (400, 600) und
-      an onKeyPress   (KeyEvent.VK_A, move_left _, 'p1) und
-      an onKeyRelease (KeyEvent.VK_A, stop_moving _, 'p1) und
-      an onKeyPress   (KeyEvent.VK_D, move_right _, 'p1) und
+    Create environment 'e1 having
+    a size (400, 600) and
+      an onKeyPress   (KeyEvent.VK_A, move_left _, 'p1) and
+      an onKeyRelease (KeyEvent.VK_A, stop_moving _, 'p1) and
+      an onKeyPress   (KeyEvent.VK_D, move_right _, 'p1) and
       an onKeyRelease (KeyEvent.VK_D, stop_moving _, 'p1)
 
-    Create environment 'e2 mit
-    a size (400, 600) und
-      an onKeyPress   (KeyEvent.VK_LEFT, move_left _, 'p2) und
-      an onKeyRelease (KeyEvent.VK_LEFT, stop_moving _, 'p2) und
-      an onKeyPress   (KeyEvent.VK_RIGHT, move_right _, 'p2) und
+    Create environment 'e2 having
+    a size (400, 600) and
+      an onKeyPress   (KeyEvent.VK_LEFT, move_left _, 'p2) and
+      an onKeyRelease (KeyEvent.VK_LEFT, stop_moving _, 'p2) and
+      an onKeyPress   (KeyEvent.VK_RIGHT, move_right _, 'p2) and
       an onKeyRelease (KeyEvent.VK_RIGHT, stop_moving _, 'p2)
 
     for (row <- 0 until 4) {
       for (col <- 0 until 10) {
         var rr = Symbol("brick1" + row + col)
-        Create roundRectangle rr und
-          a size (35, 15) und
+        Create roundRectangle rr and
+          a size (35, 15) and
           a arcSize (5, 3)
         row match {
           case 0 => rr color GameCons.red
@@ -76,8 +76,8 @@ object BrickBreaker extends JazzFramework
     for (row <- 0 until 4) {
       for (col <- 0 until 10) {
         var rr = Symbol("brick2" + row + col)
-        Create roundRectangle rr und
-          a size (35, 15) und
+        Create roundRectangle rr and
+          a size (35, 15) and
           a arcSize (5, 3)
         row match {
           case 0 => rr color GameCons.red
@@ -90,21 +90,21 @@ object BrickBreaker extends JazzFramework
       }
     }
 
-    'e1 add 'c1 und
+    'e1 add 'c1 and
       an add 'p1
 
-    'e2 add 'c2 und
+    'e2 add 'c2 and
       an add 'p2
 
     // define the frame
 
     ScalaFrame vsplit 2
-    ScalaFrame(0) = Create hPanel ('menu_bar, 7) mit
+    ScalaFrame(0) = Create hPanel ('menu_bar, 7) having
       a color GameCons.blue
-    ScalaFrame(1) = Create hPanel ('center_panel, 3) mit
+    ScalaFrame(1) = Create hPanel ('center_panel, 3) having
       a color GameCons.green
 
-    Create button 'new_game_button mit
+    Create button 'new_game_button having
       a text "New Game"
     'menu_bar(0) = 'new_game_button
     'menu_bar(1) = Create button 'options_button text "Options"
@@ -112,17 +112,17 @@ object BrickBreaker extends JazzFramework
 
     'center_panel(0) = 'e1
     'center_panel(1) = 'e2
-    'center_panel(2) = Create vPanel ('side_panel, 5) mit
+    'center_panel(2) = Create vPanel ('side_panel, 5) having
       a color GameCons.red
 
     'side_panel(0) = Create label 'high_scores_label
 
-    Create label 'credits_label mit
+    Create label 'credits_label having
       a text "Copyright your mom"
     'side_panel(1) = 'credits_label
-    'side_panel(2) = Create label 'left_score mit
+    'side_panel(2) = Create label 'left_score having
       a text "Left player score: " + left_score
-    'side_panel(3) = Create label 'right_score mit
+    'side_panel(3) = Create label 'right_score having
       a text "Right player score: " + right_score
 
     Run

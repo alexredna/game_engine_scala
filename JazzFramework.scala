@@ -236,8 +236,9 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       case default => methodError("text"); this
     }
 
-    def mit(t: Article): JazzElement = this
-    def und(t: Article): JazzElement = this
+    def has(t: Article): JazzElement = this
+    def having(t: Article): JazzElement = this
+    def and(t: Article): JazzElement = this
   }
 
   case class Environment(s: Symbol) extends JazzElement(s) {
