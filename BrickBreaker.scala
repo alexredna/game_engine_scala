@@ -42,14 +42,14 @@ object BrickBreaker extends JazzFramework
     // define all environments
 
     Create environment 'e1 having
-    a size (400, 600) and
+      a size (400, 600) and
       an onKeyPress   (KeyEvent.VK_A, move_left _, 'p1) and
       an onKeyRelease (KeyEvent.VK_A, stop_moving _, 'p1) and
       an onKeyPress   (KeyEvent.VK_D, move_right _, 'p1) and
       an onKeyRelease (KeyEvent.VK_D, stop_moving _, 'p1)
 
     Create environment 'e2 having
-    a size (400, 600) and
+      a size (400, 600) and
       an onKeyPress   (KeyEvent.VK_LEFT, move_left _, 'p2) and
       an onKeyRelease (KeyEvent.VK_LEFT, stop_moving _, 'p2) and
       an onKeyPress   (KeyEvent.VK_RIGHT, move_right _, 'p2) and
@@ -97,32 +97,31 @@ object BrickBreaker extends JazzFramework
 
     // define the frame
 
-    ScalaFrame vsplit 2
-    ScalaFrame(0) = Create hPanel ('menu_bar, 7) having
-      a color GameCons.blue
-    ScalaFrame(1) = Create hPanel ('center_panel, 3) having
-      a color GameCons.green
+    ScalaFrame vertical split
+    ScalaFrame add (Create hPanel 'menu_bar having
+      a color GameCons.blue)
+    ScalaFrame add (Create hPanel 'center_panel having
+      a color GameCons.green)
 
     Create button 'new_game_button having
       a text "New Game"
-    'menu_bar(0) = 'new_game_button
-    'menu_bar(1) = Create button 'options_button text "Options"
-    'menu_bar(2) = Create button 'help_button text "Help"
+    'menu_bar add 'new_game_button
+    'menu_bar add (Create button 'options_button text "Options")
+    'menu_bar add (Create button 'help_button text "Help")
 
-    'center_panel(0) = 'e1
-    'center_panel(1) = 'e2
-    'center_panel(2) = Create vPanel ('side_panel, 5) having
-      a color GameCons.red
+    'center_panel add 'e1
+    'center_panel add 'e2
+    'center_panel add (Create vPanel 'side_panel color GameCons.red)
 
-    'side_panel(0) = Create label 'high_scores_label
+    'side_panel add (Create label 'high_scores_label)
 
     Create label 'credits_label having
       a text "Copyright your mom"
-    'side_panel(1) = 'credits_label
-    'side_panel(2) = Create label 'left_score having
-      a text "Left player score: " + left_score
-    'side_panel(3) = Create label 'right_score having
-      a text "Right player score: " + right_score
+    'side_panel add 'credits_label
+    'side_panel add (Create label 'left_score having
+      a text "Left player score: " + left_score)
+    'side_panel add (Create label 'right_score having
+      a text "Right player score: " + right_score)
 
     Run
   }
