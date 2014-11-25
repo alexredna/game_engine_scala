@@ -197,7 +197,7 @@ object BrickBreaker extends JazzFramework
     
     if (ad < 180) {
       val angle = ad - Math.toDegrees(delta / bw * Pi)
-      val angleMod = if (angle < 0) (360 + angle) % 360 else angle % 360
+      val angleMod = angle % 360
       val a = Math.min(Math.max(angleMod, 15), 165)
       actor velocity (a, av)
     }
