@@ -499,6 +499,7 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
 
     def color(color: Color) = {
       frame.getContentPane().setBackground(color)
+      frame.getContentPane().asInstanceOf[JPanel].setOpaque(true)
       this
     }
 
@@ -522,6 +523,7 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
 
     def _color(color: Color): ScalaPanel = {
       fetch().setBackground(color)
+      fetch().setOpaque(true)
       this
     }
 

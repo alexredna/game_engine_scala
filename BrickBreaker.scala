@@ -52,6 +52,11 @@ object BrickBreaker extends JazzFramework
     Copy ('wt1, 'wt2)
     Copy ('wb1, 'wb2)
 
+    Create roundRectangle 'brick and
+    a size (35, 15) and
+    a arcSize (5, 3) and
+    a borderColor GameCons.black
+
     // interactions between already defined shapes
 
     'ball1 interaction ('paddle1, bounceWithDeflection _)
@@ -104,10 +109,7 @@ object BrickBreaker extends JazzFramework
     for (row <- 0 until 4) {
       for (col <- 0 until 10) {
         val rr = Symbol("brick1" + row + col)
-        Create roundRectangle rr and
-          a size (35, 15) and
-          a arcSize (5, 3) and
-          a borderColor GameCons.black
+        Copy ('brick, rr)
         row match {
           case 0 => rr color GameCons.red
           case 1 => rr color GameCons.blue
@@ -122,10 +124,7 @@ object BrickBreaker extends JazzFramework
     for (row <- 0 until 4) {
       for (col <- 0 until 10) {
         val rr = Symbol("brick2" + row + col)
-        Create roundRectangle rr and
-          a size (35, 15) and
-          a arcSize (5, 3) and
-          a borderColor GameCons.black
+        Copy ('brick, rr)
         row match {
           case 0 => rr color GameCons.red
           case 1 => rr color GameCons.blue
@@ -139,7 +138,7 @@ object BrickBreaker extends JazzFramework
 
     // define the frame
 
-    ScalaFrame vertical split
+    ScalaFrame vertical split color GameCons.orange
     ScalaFrame add (Create hPanel 'menu_bar having
       a color GameCons.blue)
     ScalaFrame add (Create hPanel 'center_panel having

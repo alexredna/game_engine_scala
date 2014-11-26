@@ -30,6 +30,8 @@ public class SplitPanel extends JPanel {
 
 	public void addChild(JComponent comp) {
 		JPanel dummy = new JPanel();
+		//dummy.setBackground(Color.YELLOW);
+		dummy.setOpaque(false);
 		dummy.add(comp);
 		hGroup.addComponent(dummy);
 		vGroup.addComponent(dummy);
