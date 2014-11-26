@@ -54,9 +54,13 @@ public class RoundRectangle extends AnimatingChild
     public void draw(Graphics2D g2)
     {
         if (visible) {
-            RoundRectangle2D.Double rect = new RoundRectangle2D.Double(x, y, width, height, arcWidth, arcHeight);
+            RoundRectangle2D.Double shape = new RoundRectangle2D.Double(x, y, width, height, arcWidth, arcHeight);
             g2.setColor(color);
-            g2.fill(rect);
+            g2.fill(shape);
+            if (borderColor != null) {
+                g2.setColor(borderColor);
+                g2.draw(shape);
+            }
         }
     }
 

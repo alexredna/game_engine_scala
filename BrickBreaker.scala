@@ -5,66 +5,73 @@ import math.Pi
 
 object BrickBreaker extends JazzFramework
 {
-  var left_score: Int = 0
-  var right_score: Int = 0
-  var is_paused: Boolean = false
+  val screen_width = 400
+  val screen_height = 600
+
+  var left_score = 0
+  var right_score = 0
+  var is_paused = false
 
   def main(args: Array[String])
   {
     // define all shapes
     Create circle 'c1 having
-      a location (188, 500) and
-      a radius 25 and
+      a location ((screen_width-24)/2, screen_height-100) and
+      a radius 12 and
       a color GameCons.blue and
+      a borderColor GameCons.black and
       a velocity (GameCons.north, GameCons.medium) and
       an active true
 
     Create circle 'c2 having
-      a location (188, 500) and
-      a radius 25 and
+      a location ((screen_width-24)/2, screen_height-100) and
+      a radius 12 and
       a color GameCons.cyan and
+      a borderColor GameCons.black and
       a velocity (75, GameCons.medium) and
       an active true
 
     Create rectangle 'p1 having
-      a location (160, 550) and
+      a location ((screen_width-80)/2, screen_height-50) and
       a size (80, 20) and
       an active true
 
     Create rectangle 'p2 having
-      a location (160, 550) and
+      a location ((screen_width-80)/2, screen_height-50) and
       a size (80, 20) and
       an active true
 
     Create rectangle 'wr1 having
-      a location (400, 0) and
-      a size (50, 600) and
-      an active true
+      a location (screen_width, 0) and
+      a size (50, screen_height)
 
     Create rectangle 'wl1 having
       a location (-50, 0) and
-      a size (50, 600) and
-      an active true
+      a size (50, screen_height)
 
     Create rectangle 'wt1 having
       a location (0, -50) and
-      a size (400, 50) and
-      an active true
+      a size (screen_width, 50)
+
+    Create rectangle 'wb1 having
+      a location (0, screen_height) and
+      a size (screen_width, 50)
 
     Create rectangle 'wr2 having
-      a location (400, 0) and
-      a size (50, 600) and
-      an active true
+      a location (screen_width, 0) and
+      a size (50, screen_height)
 
     Create rectangle 'wl2 having
       a location (-50, 0) and
-      a size (50, 600) and
-      an active true
+      a size (50, screen_height)
 
     Create rectangle 'wt2 having
       a location (0, -50) and
-      a size (400, 50) and
-      an active true
+      a size (screen_width, 50)
+
+    Create rectangle 'wb2 having
+      a location (0, screen_height) and
+      a size (screen_width, 50)
 
     // interactions between already defined shapes
 
@@ -72,16 +79,18 @@ object BrickBreaker extends JazzFramework
     'c1 interaction ('wr1, bounce _)
     'c1 interaction ('wl1, bounce _)
     'c1 interaction ('wt1, bounce _)
+    'c1 interaction ('wb1, gameOverP1 _)
 
     'c2 interaction ('p2, bounceWithDeflection _)
     'c2 interaction ('wr2, bounce _)
     'c2 interaction ('wl2, bounce _)
     'c2 interaction ('wt2, bounce _)
+    'c2 interaction ('wb2, gameOverP2 _)
 
     // define all environments
 
     Create environment 'e1 having
-      a size (400, 600) and
+      a size (screen_width, screen_height) and
       an onKeyPress   (KeyEvent.VK_A, move_left _, 'p1) and
       an onKeyRelease (KeyEvent.VK_A, stop_moving _, 'p1) and
       an onKeyPress   (KeyEvent.VK_D, move_right _, 'p1) and
@@ -90,10 +99,11 @@ object BrickBreaker extends JazzFramework
       an add 'p1 and
       an add 'wr1 and
       an add 'wl1 and
-      an add 'wt1
+      an add 'wt1 and
+      an add 'wb1
 
     Create environment 'e2 having
-      a size (400, 600) and
+      a size (screen_width, screen_height) and
       an onKeyPress   (KeyEvent.VK_LEFT, move_left _, 'p2) and
       an onKeyRelease (KeyEvent.VK_LEFT, stop_moving _, 'p2) and
       an onKeyPress   (KeyEvent.VK_RIGHT, move_right _, 'p2) and
@@ -102,14 +112,17 @@ object BrickBreaker extends JazzFramework
       an add 'p2 and
       an add 'wr2 and
       an add 'wl2 and
-      an add 'wt2
+      an add 'wt2 and
+      an add 'wb2
+
 
     for (row <- 0 until 4) {
       for (col <- 0 until 10) {
         var rr = Symbol("brick1" + row + col)
         Create roundRectangle rr and
           a size (35, 15) and
-          a arcSize (5, 3)
+          a arcSize (5, 3) and
+          a borderColor GameCons.black
         row match {
           case 0 => rr color GameCons.red
           case 1 => rr color GameCons.blue
@@ -126,7 +139,8 @@ object BrickBreaker extends JazzFramework
         var rr = Symbol("brick2" + row + col)
         Create roundRectangle rr and
           a size (35, 15) and
-          a arcSize (5, 3)
+          a arcSize (5, 3) and
+          a borderColor GameCons.black
         row match {
           case 0 => rr color GameCons.red
           case 1 => rr color GameCons.blue
@@ -159,9 +173,8 @@ object BrickBreaker extends JazzFramework
 
     'side_panel add (Create label 'high_scores_label)
 
-    Create label 'credits_label having
-      a text "Copyright your mom"
-    'side_panel add 'credits_label
+    'side_panel add (Create label 'credits_label having
+      a text "Copyright your mom")
     'side_panel add (Create label 'left_score having
       a text "Left player score: " + left_score)
     'side_panel add (Create label 'right_score having
@@ -268,10 +281,6 @@ object BrickBreaker extends JazzFramework
     actee visible false
   }
 
-  def change_color(actor: Shape) {
-    actor color GameCons.green
-  }
-
   def move_left(actor: Shape) {
     actor velocity (GameCons.west, 10)
   }
@@ -288,14 +297,30 @@ object BrickBreaker extends JazzFramework
     val (directionC1: Double, oldVelocityC1: Double) = 'c1 velocity;
     val (directionC2: Double, oldVelocityC2: Double) = 'c2 velocity;
     if (is_paused) {
-      'c1 velocity (directionC1, GameCons.medium)
-      'c2 velocity (directionC2, GameCons.medium)
+      'c1 active true//velocity (directionC1, GameCons.medium)
+      'c2 active true//velocity (directionC2, GameCons.medium)
       'pause_button text "Pause"
     } else {
-      'c1 velocity (directionC1, 0)
-      'c2 velocity (directionC2, 0)
+      'c1 active false //velocity (directionC1, 0)
+      'c2 active false //velocity (directionC2, 0)
       'pause_button text "UnPause"
     }
     is_paused = !is_paused
+  }
+
+  def gameOverP1(ball: Shape, bottomWall: Shape) {
+    val (dir, speed) = ball velocity
+    val (x, y) = ball location;
+    val dy = screen_height-24-y
+    val dx = dy / Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(dir))
+    ball location (x + dx, screen_height-24)
+
+    ball active false
+  }
+
+  def gameOverP2(ball: Shape, bottomWall: Shape) {
+    val (x, y) = ball location;
+    ball location (x, screen_height-24)
+    ball active false
   }
 }

@@ -170,6 +170,11 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       case default => methodError("at"); this
     }
 
+    def borderColor(color: Color): JazzElement = this match {
+      case j: Shape => j._borderColor(color)
+      case default => methodError("borderColor"); this
+    }
+
     def bounds(): (Double, Double, Double, Double) = this match {
       case j: Shape => j.g_bounds()
       case default => methodError("location"); (0, 0, 0, 0)
@@ -320,6 +325,11 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
         case rr: RoundRectangle => rr.setArcSize(width, height)
         case default => sys.error("Can only change the arcSize on a round rectangle")
       }
+      this
+    }
+
+    def _borderColor(color: Color): Shape = {
+      fetch().setBorderColor(color)
       this
     }
 

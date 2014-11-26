@@ -12,7 +12,7 @@ public class Circle extends AnimatingChild
     {
         x = 10;
         y = 10;
-        radius = 50;
+        radius = 25;
         color = Color.BLACK;
     }
 
@@ -34,14 +34,18 @@ public class Circle extends AnimatingChild
     public void draw(Graphics2D g2)
     {
         if (visible) {
-            Ellipse2D.Double rect = new Ellipse2D.Double(x, y, radius, radius);
+            Ellipse2D.Double shape = new Ellipse2D.Double(x, y, 2*radius, 2*radius);
             g2.setColor(color);
-            g2.fill(rect);
+            g2.fill(shape);
+            if (borderColor != null) {
+                g2.setColor(borderColor);
+                g2.draw(shape);
+            }
         }
     }
 
     public Rectangle2D.Double getBounds() {
-        return new Rectangle2D.Double(x, y, radius, radius);
+        return new Rectangle2D.Double(x, y, 2*radius, 2*radius);
     }
 
     public String toString() {

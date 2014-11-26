@@ -40,9 +40,13 @@ public class Rectangle extends AnimatingChild
     public void draw(Graphics2D g2)
     {
         if (visible) {
-            Rectangle2D.Double rect = new Rectangle2D.Double(x, y, width, height);
+            Rectangle2D.Double shape = new Rectangle2D.Double(x, y, width, height);
             g2.setColor(color);
-            g2.fill(rect);
+            g2.fill(shape);
+            if (borderColor != null) {
+                g2.setColor(borderColor);
+                g2.draw(shape);
+            }
         }
     }
 

@@ -13,13 +13,16 @@ abstract public class AnimatingChild
 {
     protected double x, y;
     protected Color color;
+    protected Color borderColor = null;
     protected double direction = 0;
     protected double speed = 0;
     protected boolean active = false;
     protected boolean visible = true;
 
     /**
-     * Animates the object by changing very small details, (such as size, position, or color), that affect the drawing of the object
+     * Animates the object by changing very small details,
+     * (such as size, position, or color), that affect the 
+     * drawing of the object
      */
     abstract public void animate();
 
@@ -46,6 +49,16 @@ abstract public class AnimatingChild
 
     public Color getColor() {
         return color;
+    }
+
+    public void setBorderColor(Color borderColor) {
+        this.borderColor = borderColor;
+    }
+
+    public Color getBorderColor() {
+        if (borderColor == null)
+            return color;
+        return borderColor;
     }
 
     public void setVelocity(double direction, double speed) {
