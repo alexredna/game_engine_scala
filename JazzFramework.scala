@@ -16,11 +16,10 @@ import java.awt.geom._
 import java.beans._
 import javax.swing._
 
-class JazzFramework extends KeyListener with PropertyChangeListener with MouseListener {
+class JazzFramework extends KeyListener with PropertyChangeListener {
   private val frame = new drawings.Frame("My Program")
   frame.addKeyListener(this)
   frame.addPropertyChangeListener(this)
-  frame.addMouseListener(this)
 
   private var shape_bindings = Map[Symbol, AnimatingChild]()
   private var animating_child_to_symbol = Map[AnimatingChild, Symbol]()
@@ -54,6 +53,14 @@ class JazzFramework extends KeyListener with PropertyChangeListener with MouseLi
     def environment(s: Symbol): Environment = {
       assertNotBound(s)
       val ap = new AnimatingPanel(frame)
+      ap.addMouseListener(new MouseAdapter() {
+          override def mouseClicked(e: MouseEvent) {
+            for ((shape, func) <- mouse_click_bindings)
+              if (ap.containsChild(shape.fetch()) &&
+                shape.fetch().contains(e.getPoint()))
+                func(shape)
+          }
+        })
       environment_bindings += (s -> ap)
       Environment(s)
     }
@@ -228,6 +235,11 @@ class JazzFramework extends KeyListener with PropertyChangeListener with MouseLi
       case j: Environment => j._onKeyRelease(key, action, child)
       case default => methodError("onKeyRelease"); this
     }
+    
+    def onMouseClick(func: Shape => Unit): JazzElement = this match {
+      case j: Shape => j._onClick(func)
+      case default => methodError("onClick"); this
+    }
 
     def radius(radius: Double): JazzElement = this match {
       case j: Shape => j._radius(radius)
@@ -358,15 +370,6 @@ class JazzFramework extends KeyListener with PropertyChangeListener with MouseLi
       this
     }
 
-    def _location(x: Double, y: Double): Shape = {
-      fetch().setLocation(x, y)
-      this
-    }
-    def g_location(): (Double, Double) = {
-      var p: Point2D.Double = fetch().getLocation()
-      (p.x, p.y)
-    }
-
     def _interaction(s: Shape, func: (Shape, Shape) => Unit): Shape = {
       if (!interaction_bindings.contains(this))
         interaction_bindings += (this -> Map[Shape, Set[(Shape, Shape) => Unit]]())
@@ -381,6 +384,22 @@ class JazzFramework extends KeyListener with PropertyChangeListener with MouseLi
         my_bindings += (s -> (behaviors + func))
       }
       interaction_bindings += (this -> my_bindings)
+      this
+    }
+
+    def _location(x: Double, y: Double): Shape = {
+      fetch().setLocation(x, y)
+      this
+    }
+    def g_location(): (Double, Double) = {
+      var p: Point2D.Double = fetch().getLocation()
+      (p.x, p.y)
+    }
+
+    def _onClick(func: Shape => Unit): Shape = {
+      if (mouse_click_bindings.contains(this))
+        sys.error("onClick already called on shape " + s)
+      mouse_click_bindings += (this -> func)
       this
     }
 
@@ -591,13 +610,4 @@ class JazzFramework extends KeyListener with PropertyChangeListener with MouseLi
       func(actor, actee)
     }
   }
-
-  def mouseClicked(e: MouseEvent) {
-
-  }
-
-  def mouseEntered(e: MouseEvent) {}
-  def mouseExited(e: MouseEvent) {}
-  def mousePressed(e: MouseEvent) {}
-  def mouseReleased(e: MouseEvent) {}
 }

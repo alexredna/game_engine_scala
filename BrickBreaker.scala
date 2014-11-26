@@ -21,7 +21,8 @@ object BrickBreaker extends JazzFramework
       a color GameCons.blue and
       a borderColor GameCons.black and
       a velocity (GameCons.north, GameCons.medium) and
-      an active true
+      an active true and
+      an onMouseClick changeColor
 
     Create circle 'c2 having
       a location ((screen_width-24)/2, screen_height-100) and
@@ -29,7 +30,8 @@ object BrickBreaker extends JazzFramework
       a color GameCons.cyan and
       a borderColor GameCons.black and
       a velocity (75, GameCons.medium) and
-      an active true
+      an active true and
+      an onMouseClick changeColor
 
     Create rectangle 'p1 having
       a location (screen_width*2/5, screen_height-50) and
@@ -337,5 +339,9 @@ object BrickBreaker extends JazzFramework
     else if (x > screen_width*4/5)
       x = screen_width*4/5
     paddle location (x, y)
+  }
+
+  def changeColor(actor: Shape) {
+    actor color GameCons.burnt_orange
   }
 }

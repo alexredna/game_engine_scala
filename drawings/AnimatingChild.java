@@ -91,4 +91,8 @@ abstract public class AnimatingChild
 
         return t.intersects(o.x, o.y, o.width, o.height);
     }
+
+    public boolean contains(Point p) {
+        return getBounds().contains(p.x, p.y);
+    }
 }
