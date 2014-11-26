@@ -32,13 +32,13 @@ object BrickBreaker extends JazzFramework
       an active true
 
     Create rectangle 'p1 having
-      a location ((screen_width-80)/2, screen_height-50) and
-      a size (80, 20) and
+      a location (screen_width*2/5, screen_height-50) and
+      a size (screen_width/5, 20) and
       an active true
 
     Create rectangle 'p2 having
-      a location ((screen_width-80)/2, screen_height-50) and
-      a size (80, 20) and
+      a location (screen_width*2/5, screen_height-50) and
+      a size (screen_width/5, 20) and
       an active true
 
     Create rectangle 'wr1 having
@@ -86,6 +86,11 @@ object BrickBreaker extends JazzFramework
     'c2 interaction ('wl2, bounce _)
     'c2 interaction ('wt2, bounce _)
     'c2 interaction ('wb2, gameOverP2 _)
+
+    'p1 interaction ('wr1, paddleOutOfBounds _)
+    'p1 interaction ('wl1, paddleOutOfBounds _)
+    'p2 interaction ('wr2, paddleOutOfBounds _)
+    'p2 interaction ('wl2, paddleOutOfBounds _)
 
     // define all environments
 
@@ -294,15 +299,13 @@ object BrickBreaker extends JazzFramework
   }
 
   def pause() {
-    val (directionC1: Double, oldVelocityC1: Double) = 'c1 velocity;
-    val (directionC2: Double, oldVelocityC2: Double) = 'c2 velocity;
     if (is_paused) {
-      'c1 active true//velocity (directionC1, GameCons.medium)
-      'c2 active true//velocity (directionC2, GameCons.medium)
+      'c1 active true
+      'c2 active true
       'pause_button text "Pause"
     } else {
-      'c1 active false //velocity (directionC1, 0)
-      'c2 active false //velocity (directionC2, 0)
+      'c1 active false
+      'c2 active false
       'pause_button text "UnPause"
     }
     is_paused = !is_paused
@@ -314,13 +317,25 @@ object BrickBreaker extends JazzFramework
     val dy = screen_height-24-y
     val dx = dy / Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(dir))
     ball location (x + dx, screen_height-24)
-
     ball active false
   }
 
+  // same as p1 for now ...
   def gameOverP2(ball: Shape, bottomWall: Shape) {
+    val (dir, speed) = ball velocity
     val (x, y) = ball location;
-    ball location (x, screen_height-24)
+    val dy = screen_height-24-y
+    val dx = dy / Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(dir))
+    ball location (x + dx, screen_height-24)
     ball active false
+  }
+
+  def paddleOutOfBounds(paddle: Shape, sideWall: Shape) {
+    var (x, y) = paddle location;
+    if (x < 0)
+      x = 0
+    else if (x > screen_width*4/5)
+      x = screen_width*4/5
+    paddle location (x, y)
   }
 }
