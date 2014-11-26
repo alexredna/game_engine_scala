@@ -45,6 +45,10 @@ public class AnimatingPanel extends JPanel implements Runnable
         children.add(child);
     }
 
+    public boolean containsChild(AnimatingChild child) {
+        return children.contains(child);
+    }
+
     public void startAnimation()
     {
         if (animator == null || !animator.isAlive()) {

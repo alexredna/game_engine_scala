@@ -16,17 +16,21 @@ import java.awt.geom._
 import java.beans._
 import javax.swing._
 
-class JazzFramework extends KeyListener with PropertyChangeListener {
+class JazzFramework extends KeyListener with PropertyChangeListener with MouseListener {
   private val frame = new drawings.Frame("My Program")
   frame.addKeyListener(this)
   frame.addPropertyChangeListener(this)
+  frame.addMouseListener(this)
 
   private var shape_bindings = Map[Symbol, AnimatingChild]()
   private var animating_child_to_symbol = Map[AnimatingChild, Symbol]()
+  private var interaction_bindings = Map[Shape, Map[Shape, Set[(Shape, Shape) => Unit]]]()
+  private var mouse_click_bindings = Map[Shape, Shape => Unit]()
+
   private var environment_bindings = Map[Symbol, AnimatingPanel]()
+
   private var key_press_bindings   = Map[Int, Map[Shape, Shape => Unit]]()
   private var key_release_bindings = Map[Int, Map[Shape, Shape => Unit]]()
-  private var interaction_bindings = Map[Shape, Map[Shape, Set[(Shape, Shape) => Unit]]]()
 
   private var panel_bindings = Map[Symbol, SplitPanel]()
   private var component_bindings = Map[Symbol, JComponent]()
@@ -265,11 +269,19 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
   case class Environment(s: Symbol) extends JazzElement(s) {
     def fetch(): AnimatingPanel = environment_bindings.get(s).get
 
+    private def assertShapeNotInAnyEnvironment(shape: Shape) {
+      for ((eSymbol, animatingPanel) <- environment_bindings) {
+        if (animatingPanel.containsChild(shape.fetch()))
+          sys.error(shape + " already added to an environment")
+      }
+    }
+
     var lastAdded: Shape = null
 
     def _add(e: JazzElement): Environment = {
       e match {
         case s: Shape =>
+          assertShapeNotInAnyEnvironment(s)
           fetch().addChild(s.fetch())
           lastAdded = s
         case default => sys.error("Cannot add " + e + " to environment: it is not a shape")
@@ -579,4 +591,13 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       func(actor, actee)
     }
   }
+
+  def mouseClicked(e: MouseEvent) {
+
+  }
+
+  def mouseEntered(e: MouseEvent) {}
+  def mouseExited(e: MouseEvent) {}
+  def mousePressed(e: MouseEvent) {}
+  def mouseReleased(e: MouseEvent) {}
 }
