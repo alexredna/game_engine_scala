@@ -27,6 +27,7 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
   private var mouse_click_bindings = Map[Shape, Shape => Unit]()
 
   private var environment_bindings = Map[Symbol, AnimatingPanel]()
+  private var environment_click_bindings = Map[AnimatingPanel, (Int, Int) => Unit]()
 
   private var key_press_bindings   = Map[Int, Map[Shape, Shape => Unit]]()
   private var key_release_bindings = Map[Int, Map[Shape, Shape => Unit]]()
@@ -55,10 +56,18 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       val ap = new AnimatingPanel(frame)
       ap.addMouseListener(new MouseAdapter() {
           override def mouseClicked(e: MouseEvent) {
-            for ((shape, func) <- mouse_click_bindings)
+            var foundShape = false
+            for ((shape, func) <- mouse_click_bindings) {
               if (ap.containsChild(shape.fetch()) &&
-                shape.fetch().contains(e.getPoint()))
+                shape.fetch().contains(e.getPoint())) {
                 func(shape)
+                foundShape = true
+              }
+            }
+            if (!foundShape && environment_click_bindings.contains(ap)) {
+              val func: (Int, Int) => Unit = environment_click_bindings.get(ap).get
+              func(e.getPoint().x, e.getPoint().y)
+            }
           }
         })
       environment_bindings += (s -> ap)
@@ -240,6 +249,10 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       case j: Shape => j._onClick(func)
       case default => methodError("onClick"); this
     }
+    def onMouseClick(func: (Int, Int) => Unit): JazzElement = this match {
+      case j: Environment => j._onClick(func)
+      case default => methodError("onClick"); this
+    }
 
     def radius(radius: Double): JazzElement = this match {
       case j: Shape => j._radius(radius)
@@ -309,8 +322,11 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       this
     }
 
-    def _size(width: Int, height: Int): Environment = {
-      fetch().setPreferredSize(new Dimension(width, height))
+    def _onClick(func: (Int, Int) => Unit): Environment = {
+      val ap: AnimatingPanel = fetch()
+      if (environment_click_bindings.contains(ap))
+        sys.error("onClick already called for environment " + s)
+      environment_click_bindings += (ap -> func)
       this
     }
 
@@ -333,6 +349,11 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       } else {
         key_release_bindings.get(key).get += (child -> action)
       }
+      this
+    }
+
+    def _size(width: Int, height: Int): Environment = {
+      fetch().setPreferredSize(new Dimension(width, height))
       this
     }
 

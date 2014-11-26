@@ -22,7 +22,7 @@ object BrickBreaker extends JazzFramework
       a borderColor GameCons.black and
       a velocity (GameCons.north, GameCons.medium) and
       an active true and
-      an onMouseClick changeColor
+      an onMouseClick changeColor _
 
     Create circle 'c2 having
       a location ((screen_width-24)/2, screen_height-100) and
@@ -31,7 +31,7 @@ object BrickBreaker extends JazzFramework
       a borderColor GameCons.black and
       a velocity (75, GameCons.medium) and
       an active true and
-      an onMouseClick changeColor
+      an onMouseClick changeColor _
 
     Create rectangle 'p1 having
       a location (screen_width*2/5, screen_height-50) and
@@ -102,6 +102,7 @@ object BrickBreaker extends JazzFramework
       an onKeyRelease (KeyEvent.VK_A, stop_moving _, 'p1) and
       an onKeyPress   (KeyEvent.VK_D, move_right _, 'p1) and
       an onKeyRelease (KeyEvent.VK_D, stop_moving _, 'p1) and
+      an onMouseClick addBall _ and
       an add 'c1 and
       an add 'p1 and
       an add 'wr1 and
@@ -125,7 +126,7 @@ object BrickBreaker extends JazzFramework
 
     for (row <- 0 until 4) {
       for (col <- 0 until 10) {
-        var rr = Symbol("brick1" + row + col)
+        val rr = Symbol("brick1" + row + col)
         Create roundRectangle rr and
           a size (35, 15) and
           a arcSize (5, 3) and
@@ -143,7 +144,7 @@ object BrickBreaker extends JazzFramework
 
     for (row <- 0 until 4) {
       for (col <- 0 until 10) {
-        var rr = Symbol("brick2" + row + col)
+        val rr = Symbol("brick2" + row + col)
         Create roundRectangle rr and
           a size (35, 15) and
           a arcSize (5, 3) and
@@ -343,5 +344,19 @@ object BrickBreaker extends JazzFramework
 
   def changeColor(actor: Shape) {
     actor color GameCons.burnt_orange
+  }
+
+  var additionalBallNum: Int = 0
+  def addBall(x: Int, y: Int) {
+    val ball = Symbol("additionalBall" + additionalBallNum)
+    additionalBallNum += 1
+    Create circle ball having
+      a location (x-12, y-12) and
+      a radius 12 and
+      a color GameCons.pink and
+      a borderColor GameCons.black and
+      a velocity (GameCons.north, GameCons.medium) and
+      an active true
+    'e1 add ball
   }
 }
