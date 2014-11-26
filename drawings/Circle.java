@@ -16,6 +16,20 @@ public class Circle extends AnimatingChild
         color = Color.BLACK;
     }
 
+    public Circle(Circle other) {
+        this.x = other.x;
+        this.y = other.y;
+        this.color = new Color(other.color.getRGB());
+        if (other.borderColor != null)
+            this.borderColor = new Color(other.borderColor.getRGB());
+        this.direction = other.direction;
+        this.speed = other.speed;
+        this.active = other.active;
+        this.visible = other.visible;
+
+        this.radius = other.radius;
+    }
+
     public void setRadius(double radius) {
         this.radius = radius;
     }

@@ -18,6 +18,23 @@ public class RoundRectangle extends AnimatingChild
         color = Color.BLACK;
     }
 
+    public RoundRectangle(RoundRectangle other) {
+        this.x = other.x;
+        this.y = other.y;
+        this.color = new Color(other.color.getRGB());
+        if (other.borderColor != null)
+            this.borderColor = new Color(other.borderColor.getRGB());
+        this.direction = other.direction;
+        this.speed = other.speed;
+        this.active = other.active;
+        this.visible = other.visible;
+
+        this.width = other.width;
+        this.height = other.height;
+        this.arcWidth = other.arcWidth;
+        this.arcHeight = other.arcHeight;
+    }
+
     public void setSize(double width, double height) {
         this.width = width;
         this.height = height;

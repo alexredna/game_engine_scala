@@ -15,33 +15,21 @@ object BrickBreaker extends JazzFramework
   def main(args: Array[String])
   {
     // define all shapes
-    Create circle 'c1 having
-      a location ((screen_width-24)/2, screen_height-100) and
-      a radius 12 and
-      a color GameCons.blue and
-      a borderColor GameCons.black and
-      a velocity (GameCons.north, GameCons.medium) and
-      an active true and
-      an onMouseClick changeColor _
-
-    Create circle 'c2 having
+    Create circle 'ball1 having
       a location ((screen_width-24)/2, screen_height-100) and
       a radius 12 and
       a color GameCons.cyan and
       a borderColor GameCons.black and
-      a velocity (75, GameCons.medium) and
+      a velocity (70, GameCons.medium) and
       an active true and
       an onMouseClick changeColor _
+    Copy ('ball1, 'ball2)
 
-    Create rectangle 'p1 having
+    Create rectangle 'paddle1 having
       a location (screen_width*2/5, screen_height-50) and
       a size (screen_width/5, 20) and
       an active true
-
-    Create rectangle 'p2 having
-      a location (screen_width*2/5, screen_height-50) and
-      a size (screen_width/5, 20) and
-      an active true
+    Copy ('paddle1, 'paddle2)
 
     Create rectangle 'wr1 having
       a location (screen_width, 0) and
@@ -59,52 +47,41 @@ object BrickBreaker extends JazzFramework
       a location (0, screen_height) and
       a size (screen_width, 50)
 
-    Create rectangle 'wr2 having
-      a location (screen_width, 0) and
-      a size (50, screen_height)
-
-    Create rectangle 'wl2 having
-      a location (-50, 0) and
-      a size (50, screen_height)
-
-    Create rectangle 'wt2 having
-      a location (0, -50) and
-      a size (screen_width, 50)
-
-    Create rectangle 'wb2 having
-      a location (0, screen_height) and
-      a size (screen_width, 50)
+    Copy ('wr1, 'wr2)
+    Copy ('wl1, 'wl2)
+    Copy ('wt1, 'wt2)
+    Copy ('wb1, 'wb2)
 
     // interactions between already defined shapes
 
-    'c1 interaction ('p1, bounceWithDeflection _)
-    'c1 interaction ('wr1, bounce _)
-    'c1 interaction ('wl1, bounce _)
-    'c1 interaction ('wt1, bounce _)
-    'c1 interaction ('wb1, gameOverP1 _)
+    'ball1 interaction ('paddle1, bounceWithDeflection _)
+    'ball1 interaction ('wr1, bounce _)
+    'ball1 interaction ('wl1, bounce _)
+    'ball1 interaction ('wt1, bounce _)
+    'ball1 interaction ('wb1, gameOverP1 _)
 
-    'c2 interaction ('p2, bounceWithDeflection _)
-    'c2 interaction ('wr2, bounce _)
-    'c2 interaction ('wl2, bounce _)
-    'c2 interaction ('wt2, bounce _)
-    'c2 interaction ('wb2, gameOverP2 _)
+    'ball2 interaction ('paddle2, bounceWithDeflection _)
+    'ball2 interaction ('wr2, bounce _)
+    'ball2 interaction ('wl2, bounce _)
+    'ball2 interaction ('wt2, bounce _)
+    'ball2 interaction ('wb2, gameOverP2 _)
 
-    'p1 interaction ('wr1, paddleOutOfBounds _)
-    'p1 interaction ('wl1, paddleOutOfBounds _)
-    'p2 interaction ('wr2, paddleOutOfBounds _)
-    'p2 interaction ('wl2, paddleOutOfBounds _)
+    'paddle1 interaction ('wr1, paddleOutOfBounds _)
+    'paddle1 interaction ('wl1, paddleOutOfBounds _)
+    'paddle2 interaction ('wr2, paddleOutOfBounds _)
+    'paddle2 interaction ('wl2, paddleOutOfBounds _)
 
     // define all environments
 
     Create environment 'e1 having
       a size (screen_width, screen_height) and
-      an onKeyPress   (KeyEvent.VK_A, move_left _, 'p1) and
-      an onKeyRelease (KeyEvent.VK_A, stop_moving _, 'p1) and
-      an onKeyPress   (KeyEvent.VK_D, move_right _, 'p1) and
-      an onKeyRelease (KeyEvent.VK_D, stop_moving _, 'p1) and
+      an onKeyPress   (KeyEvent.VK_A, move_left _, 'paddle1) and
+      an onKeyRelease (KeyEvent.VK_A, stop_moving _, 'paddle1) and
+      an onKeyPress   (KeyEvent.VK_D, move_right _, 'paddle1) and
+      an onKeyRelease (KeyEvent.VK_D, stop_moving _, 'paddle1) and
       an onMouseClick addBall _ and
-      an add 'c1 and
-      an add 'p1 and
+      an add 'ball1 and
+      an add 'paddle1 and
       an add 'wr1 and
       an add 'wl1 and
       an add 'wt1 and
@@ -112,12 +89,12 @@ object BrickBreaker extends JazzFramework
 
     Create environment 'e2 having
       a size (screen_width, screen_height) and
-      an onKeyPress   (KeyEvent.VK_LEFT, move_left _, 'p2) and
-      an onKeyRelease (KeyEvent.VK_LEFT, stop_moving _, 'p2) and
-      an onKeyPress   (KeyEvent.VK_RIGHT, move_right _, 'p2) and
-      an onKeyRelease (KeyEvent.VK_RIGHT, stop_moving _, 'p2) and
-      an add 'c2 and
-      an add 'p2 and
+      an onKeyPress   (KeyEvent.VK_LEFT, move_left _, 'paddle2) and
+      an onKeyRelease (KeyEvent.VK_LEFT, stop_moving _, 'paddle2) and
+      an onKeyPress   (KeyEvent.VK_RIGHT, move_right _, 'paddle2) and
+      an onKeyRelease (KeyEvent.VK_RIGHT, stop_moving _, 'paddle2) and
+      an add 'ball2 and
+      an add 'paddle2 and
       an add 'wr2 and
       an add 'wl2 and
       an add 'wt2 and
@@ -138,7 +115,7 @@ object BrickBreaker extends JazzFramework
           case 3 => rr color GameCons.yellow
         }
         'e1 add rr at (25 + col * 35, 25 + row * 15)
-        'c1 interaction (rr, destroyAndBouncePlayerLeft _)
+        'ball1 interaction (rr, destroyAndBouncePlayerLeft _)
       }
     }
 
@@ -156,7 +133,7 @@ object BrickBreaker extends JazzFramework
           case 3 => rr color GameCons.yellow
         }
         'e2 add rr at (25 + col * 35, 25 + row * 15)
-        'c2 interaction (rr, destroyAndBouncePlayerRight _)
+        'ball2 interaction (rr, destroyAndBouncePlayerRight _)
       }
     }
 
@@ -303,12 +280,12 @@ object BrickBreaker extends JazzFramework
 
   def pause() {
     if (is_paused) {
-      'c1 active true
-      'c2 active true
+      'ball1 active true
+      'ball2 active true
       'pause_button text "Pause"
     } else {
-      'c1 active false
-      'c2 active false
+      'ball1 active false
+      'ball2 active false
       'pause_button text "UnPause"
     }
     is_paused = !is_paused
@@ -323,7 +300,7 @@ object BrickBreaker extends JazzFramework
     ball active false
   }
 
-  // same as p1 for now ...
+  // same as paddle1 for now ...
   def gameOverP2(ball: Shape, bottomWall: Shape) {
     val (dir, speed) = ball velocity
     val (x, y) = ball location;

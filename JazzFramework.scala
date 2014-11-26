@@ -23,8 +23,8 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
 
   private var shape_bindings = Map[Symbol, AnimatingChild]()
   private var animating_child_to_symbol = Map[AnimatingChild, Symbol]()
-  private var interaction_bindings = Map[Shape, Map[Shape, Set[(Shape, Shape) => Unit]]]()
   private var mouse_click_bindings = Map[Shape, Shape => Unit]()
+  private var interaction_bindings = Map[Shape, Map[Shape, Set[(Shape, Shape) => Unit]]]()
 
   private var environment_bindings = Map[Symbol, AnimatingPanel]()
   private var environment_click_bindings = Map[AnimatingPanel, (Int, Int) => Unit]()
@@ -143,6 +143,28 @@ class JazzFramework extends KeyListener with PropertyChangeListener {
       t.setForeground(Color.BLACK)
       component_bindings += (s -> t)
       ScalaComponent(s)
+    }
+  }
+
+  def Copy (s1: Symbol, s2: Symbol) {
+    assertShape(s1)
+    assertNotBound(s2)
+    val ac1: AnimatingChild = shape_bindings.get(s1).get
+    var ac2: AnimatingChild = null
+    ac1 match {
+      case c: Circle =>
+        ac2 = new Circle(c)
+      case r: Rectangle =>
+        ac2 = new Rectangle(r)
+      case rr: RoundRectangle =>
+        ac2 = new RoundRectangle(rr)
+    }
+
+    shape_bindings += (s2 -> ac2)
+    animating_child_to_symbol += (ac2 -> s2)
+    if (mouse_click_bindings.contains(Shape(s1))) {
+      val func = mouse_click_bindings.get(Shape(s1)).get
+      mouse_click_bindings += (Shape(s2) -> func)
     }
   }
 
