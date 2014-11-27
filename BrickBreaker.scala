@@ -10,6 +10,9 @@ object BrickBreaker extends JazzFramework
 
   var left_score = 0
   var right_score = 0
+  var left_lives = 3
+  var right_lives = 3
+
   var is_paused = false
 
   def main(args: Array[String])
@@ -21,7 +24,6 @@ object BrickBreaker extends JazzFramework
       a color GameCons.cyan and
       a borderColor GameCons.black and
       a velocity (70, GameCons.medium) and
-      an active true and
       an onMouseClick changeColor _
     Copy ('ball1, 'ball2)
 
@@ -144,25 +146,28 @@ object BrickBreaker extends JazzFramework
     ScalaFrame add (Create hPanel 'center_panel having
       a color GameCons.green)
 
-    Create button 'pause_button having
+    'menu_bar add (Create button 'new_game_button having
+      a text "Start Game" and
+      an onClick startGame)
+    'menu_bar add (Create button 'pause_button having
       a text "Pause" and
-      an onClick pause
-    'menu_bar add 'pause_button
-    'menu_bar add (Create button 'options_button text "Options")
+      an onClick pause)
     'menu_bar add (Create button 'help_button text "Help")
 
-    'center_panel add 'e1
-    'center_panel add 'e2
+    'center_panel add (Create vPanel 'left_player having
+      a color GameCons.red and
+      an add (Create label 'left_lives text "Lives: " + left_lives) and
+      an add (Create label 'left_score text "Score: " + left_score) and
+      an add 'e1)
+    'center_panel add (Create vPanel 'right_player having
+      a color GameCons.red and
+      an add (Create label 'right_lives text "Lives: " + right_lives) and
+      an add (Create label 'right_score text "Score: " + right_score) and
+      an add 'e2)
     'center_panel add (Create vPanel 'side_panel color GameCons.red)
-
-    'side_panel add (Create label 'high_scores_label)
 
     'side_panel add (Create label 'credits_label having
       a text "Copyright your mom")
-    'side_panel add (Create label 'left_score having
-      a text "Left player score: " + left_score)
-    'side_panel add (Create label 'right_score having
-      a text "Right player score: " + right_score)
 
     Run
   }
@@ -171,14 +176,14 @@ object BrickBreaker extends JazzFramework
     destroy(actor, actee)
     bounce(actor, actee)
     left_score += 1
-    'left_score text "Left player score: " + left_score
+    'left_score text "Score: " + left_score
   }
 
   def destroyAndBouncePlayerRight(actor: Shape, actee: Shape) {
     destroy(actor, actee)
     bounce(actor, actee)
     right_score += 1
-    'right_score text "Right player score: " + right_score
+    'right_score text "Score: " + right_score
   }
 
   def bounceWithDeflection(actor: Shape, actee: Shape) {
@@ -277,6 +282,28 @@ object BrickBreaker extends JazzFramework
     actor velocity (0, 0)
   }
 
+  def startGame() {
+    left_score = 0
+    right_score = 0
+    left_lives = 3
+    right_lives = 3
+    'left_score text "Score: " + left_score
+    'right_score text "Score: " + right_score
+    'left_lives text "Lives: " + left_lives
+    'right_lives text "Lives: " + right_lives
+
+    'ball1 location ((screen_width-24)/2, screen_height-100) and
+      a velocity (70, GameCons.medium) and
+      an active true
+    'ball2 location ((screen_width-24)/2, screen_height-100) and
+      a velocity (70, GameCons.medium) and
+      an active true
+    for (row <- 0 until 4)
+      for (col <- 0 until 10)
+        for (player <- 1 until 2)
+          Symbol("brick" + player + row + col) visible true
+  }
+
   def pause() {
     if (is_paused) {
       'ball1 active true
@@ -295,8 +322,16 @@ object BrickBreaker extends JazzFramework
     val (x, y) = ball location;
     val dy = screen_height-24-y
     val dx = dy / Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(dir))
-    ball location (x + dx, screen_height-24)
-    ball active false
+    ball location (x + dx, screen_height-24) and
+      a velocity (0, 0) and
+      an active false
+    left_lives -= 1
+    'left_lives text "Lives: " + left_lives
+    if (left_lives > 0) {
+      ball location ((screen_width-24)/2, screen_height-100) and
+        a velocity (70, GameCons.medium) and
+        an active true
+    }
   }
 
   // same as paddle1 for now ...
@@ -305,8 +340,16 @@ object BrickBreaker extends JazzFramework
     val (x, y) = ball location;
     val dy = screen_height-24-y
     val dx = dy / Math.sin(Math.toRadians(dir)) * Math.cos(Math.toRadians(dir))
-    ball location (x + dx, screen_height-24)
-    ball active false
+    ball location (x + dx, screen_height-24) and
+      a velocity (0, 0) and
+      an active false
+    right_lives -= 1
+    'right_lives text "Lives: " + right_lives
+    if (right_lives > 0) {
+      ball location ((screen_width-24)/2, screen_height-100) and
+        a velocity (70, GameCons.medium) and
+        an active true
+    }
   }
 
   def paddleOutOfBounds(paddle: Shape, sideWall: Shape) {
