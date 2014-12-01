@@ -13,19 +13,20 @@ Scala Jazz is a Scala DSL meant for fast and easy GUI and animation creation. To
 
 program ::= __Run__ | statement \\n program  
 statement ::= declaration | assignment | frameLine  
-declaration\<type\> ::= __Create__ type _id_\<unbound\> propertyList\<type\>  
-declaration\<shape\> ::= __Copy__ _id_\<shape\> _id_\<unbound\>  
-assignment\<type\> ::= _id_\<type\> propertyList\<type\>  
-propertyList\<type\> ::= [glue \\n article] property\<type\> [propertyList\<type\>] 
-frameLine ::= __ScalaFrame__ property\<frame\>  
+declaration ::= __Create__ type _id_ propertyList  
+declaration ::= __Copy__ _id_ _id_  
+assignment ::= _id_ propertyList  
+propertyList ::= [glue \\n article] property [propertyList]  
+frameLine ::= __ScalaFrame__ property  
 type ::= component | shape  
 component ::=  button | label | textField | hPanel | vPanel | environment  
 container ::= hPanel | vPanel | frame  
 shape ::= circle | rectangle | roundRectangle   
 glue ::=  has | having | and | mit | und  
 article ::= a | an  
+property ::= (\*Functions defined for objects in API\*)
 
-## API
+## API (In progress)
 
 property\<frame\> ::= __vertical__ __split__ | __horizontal__ __split__  
 
